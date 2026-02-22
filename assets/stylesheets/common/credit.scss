@@ -328,6 +328,80 @@
   &:hover .d-icon { color: var(--love-low); }
 }
 
+// Tip info display (reactions-style, below post content)
+.credit-tip-info {
+  margin-top: 10px;
+
+  // 收起状态：摘要行
+  .tip-summary-row {
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 10px; border-radius: 16px;
+    background: var(--primary-very-low);
+    border: 1px solid var(--primary-low);
+    transition: background 0.15s;
+    user-select: none;
+    &:hover { background: var(--primary-low); }
+  }
+  .tip-summary-icon { font-size: 0.95em; line-height: 1; }
+  .tip-summary-avatars {
+    display: flex; align-items: center;
+    .tip-preview-avatar {
+      border-radius: 50%; margin-left: -4px;
+      border: 2px solid var(--secondary);
+      &:first-child { margin-left: 0; }
+    }
+    .tip-preview-more {
+      font-size: 0.75em; color: var(--primary-medium); margin-left: 2px; font-weight: 500;
+    }
+  }
+  .tip-summary-text {
+    font-size: 0.85em; color: var(--primary-medium);
+    strong { color: var(--tertiary); font-weight: 700; }
+  }
+
+  // 展开状态：详细列表
+  .tip-detail-panel {
+    margin-top: 6px;
+    background: var(--secondary); border: 1px solid var(--primary-low);
+    border-radius: 8px; padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 320px;
+  }
+  .tip-detail-header {
+    font-size: 0.8em; color: var(--primary-medium); font-weight: 600;
+    padding-bottom: 6px; margin-bottom: 4px;
+    border-bottom: 1px solid var(--primary-low);
+  }
+  .tip-detail-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--primary-very-low);
+    &:last-child { border-bottom: none; }
+  }
+  .tip-detail-avatar {
+    flex-shrink: 0;
+    img { border-radius: 50%; display: block; }
+  }
+  .tip-detail-username {
+    flex: 1; font-size: 0.85em; font-weight: 500;
+    color: var(--primary); text-decoration: none;
+    &:hover { color: var(--tertiary); }
+  }
+  .tip-detail-amount {
+    font-size: 0.85em; font-weight: 600; color: var(--tertiary);
+    white-space: nowrap;
+  }
+
+  &.expanded .tip-summary-row {
+    background: var(--primary-low);
+  }
+}
+
+// Profile tip button
+.credit-profile-tip-btn {
+  margin-left: 8px;
+}
+
 // ========================================
 // Admin Page
 // ========================================

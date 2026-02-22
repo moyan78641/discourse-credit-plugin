@@ -2,8 +2,9 @@
 
 module ::DiscourseCredit
   class TipController < BaseController
-    before_action :ensure_wallet
-    before_action :ensure_pay_key
+    before_action :ensure_wallet, only: [:create]
+    before_action :ensure_pay_key, only: [:create]
+    skip_before_action :ensure_logged_in, only: [:post_tips]
 
     # POST /credit/tip
     # params: target_user_id, amount, pay_key, tip_type (topic/comment/profile), post_id (optional)
@@ -66,11 +67,37 @@ module ::DiscourseCredit
           status: "success",
           order_type: "tip",
           remark: remark,
+          post_id: post_id.present? ? post_id.to_i : nil,
           trade_time: Time.current,
         )
 
         render json: { success: true, order_no: order.order_no, amount: amount, fee_amount: fee_amount, actual_amount: actual_amount }
       end
+    end
+
+    # GET /credit/tip/post/:post_id.json — 获取帖子的打赏记录
+    def post_tips
+      post_id = params[:post_id].to_i
+      tips = CreditOrder.where(order_type: "tip", post_id: post_id, status: "success").order(created_at: :desc)
+
+      user_ids = tips.map(&:payer_user_id).uniq
+      users = User.where(id: user_ids).index_by(&:id)
+
+      total = tips.sum(:actual_amount).to_f
+
+      render json: {
+        total_amount: total,
+        count: tips.count,
+        tips: tips.map { |t|
+          u = users[t.payer_user_id]
+          {
+            username: u&.username,
+            avatar_template: u&.avatar_template,
+            amount: t.actual_amount.to_f,
+            created_at: t.created_at&.iso8601,
+          }
+        },
+      }
     end
   end
 end

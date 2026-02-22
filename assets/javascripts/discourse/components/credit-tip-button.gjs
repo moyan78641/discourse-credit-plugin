@@ -41,7 +41,8 @@ function showTipModal(targetUserId, postId, tipType) {
         </div>
         <div class="form-row">
           <label>支付密码</label>
-          <input type="password" id="tip-pay-key" maxlength="6" placeholder="6位数字支付密码" />
+          <input type="password" id="tip-pay-key" maxlength="6"
+            placeholder="6位数字支付密码" />
         </div>
         <div id="tip-error" class="credit-error" style="display:none"></div>
         <div id="tip-success" class="credit-success" style="display:none"></div>
@@ -96,6 +97,12 @@ async function doTip(targetUserId, postId, tipType, overlay) {
       successEl.style.display = "block";
     }
     if (btn) { btn.textContent = "完成"; }
+
+    // 刷新帖子的打赏信息
+    if (window.__creditRefreshTipInfo) {
+      window.__creditRefreshTipInfo(postId);
+    }
+
     setTimeout(() => overlay?.remove(), 1500);
   } catch (e) {
     const msg = e.jqXHR?.responseJSON?.error || "打赏失败";
@@ -104,5 +111,4 @@ async function doTip(targetUserId, postId, tipType, overlay) {
   }
 }
 
-// 导出给个人主页用
 export { showTipModal };

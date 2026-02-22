@@ -11,6 +11,7 @@ DiscourseCredit::Engine.routes.draw do
 
   # 打赏
   post "/tip"             => "tip#create"
+  get  "/tip/post/:post_id" => "tip#post_tips"
 
   # 红包（话题内嵌入）
   post "/redenvelope/create"    => "red_envelope#create"

@@ -151,6 +151,7 @@ module ::DiscourseCredit
       return render json: { error: "卖家钱包异常" }, status: 400 unless seller_wallet
 
       card_key_content = nil
+      order = nil
 
       ActiveRecord::Base.transaction do
         wallet.update!(available_balance: wallet.available_balance - amount, total_payment: wallet.total_payment + amount)

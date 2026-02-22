@@ -21,7 +21,10 @@ class CreditProductDetailPage extends Component {
   }
 
   get productId() {
-    if (this.args.model?.id) return this.args.model.id;
+    const m = this.args.model;
+    if (m?.id) return m.id;
+    if (m?.params?.id) return m.params.id;
+    // URL fallback
     const match = window.location.pathname.match(/\/credit\/product\/(\d+)/);
     return match ? match[1] : null;
   }
@@ -102,4 +105,4 @@ class CreditProductDetailPage extends Component {
   </template>
 }
 
-export default RouteTemplate(<template><CreditProductDetailPage /></template>);
+export default RouteTemplate(<template><CreditProductDetailPage @model={{@model}} /></template>);

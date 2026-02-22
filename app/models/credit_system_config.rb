@@ -7,7 +7,7 @@ class CreditSystemConfig < ActiveRecord::Base
   DEFAULTS = {
     "new_user_initial_credit" => { value: "100", desc: "新用户初始积分" },
     "new_user_protection_days" => { value: "7", desc: "新用户保护期（天）" },
-    "tip_fee_rate" => { value: "0", desc: "打赏手续费率（0-1）" },
+    "tip_fee_rate" => { value: "0.01", desc: "打赏手续费率（0-1）" },
     "tip_min_amount" => { value: "1", desc: "打赏最小金额" },
     "tip_max_amount" => { value: "10000", desc: "打赏最大金额" },
     "merchant_fee_rate" => { value: "0.01", desc: "商户手续费率（0-1）" },
