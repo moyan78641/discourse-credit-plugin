@@ -62,4 +62,25 @@ after_initialize do
   %w[
     credit_merchant_notify
   ].each { |j| require File.join(plugin_root, "app", "jobs", "regular", j) }
+
+  # 注册顶层易支付兼容路由（.php 后缀路径）
+  Discourse::Application.routes.prepend do
+    scope module: "discourse_credit" do
+      match "/credit-pay/submit.php", to: "merchant_pay#create_order", via: [:get, :post]
+      get   "/credit-api.php",        to: "merchant_pay#query_order"
+      post  "/credit-api.php",        to: "merchant_pay#refund_order"
+    end
+
+    # Ember shell 路由 — 直接访问 URL 时 Rails 返回 Ember 壳
+    get "/credit" => "list#latest"
+    get "/credit/transfer" => "list#latest"
+    get "/credit/redenvelope" => "list#latest"
+    get "/credit/redenvelope/:id" => "list#latest"
+    get "/credit/merchant" => "list#latest"
+    get "/credit/product/:id" => "list#latest"
+    get "/credit/disputes" => "list#latest"
+    get "/credit/dashboard" => "list#latest"
+    get "/credit/admin" => "list#latest"
+    get "/credit/pay" => "list#latest"
+  end
 end

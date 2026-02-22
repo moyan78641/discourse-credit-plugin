@@ -33,6 +33,37 @@ module ::DiscourseCredit
       render json: { total: total, page: page, page_size: page_size, disputes: build_dispute_list(disputes) }
     end
 
+    # GET /credit/disputable-orders.json — orders eligible for dispute
+    def disputable_orders
+      dispute_hours = config_get_i("dispute_time_window_hours")
+      dispute_hours = 72 if dispute_hours <= 0
+      cutoff = Time.current - dispute_hours.hours
+
+      existing_dispute_order_ids = CreditDispute.pluck(:order_id)
+
+      orders = CreditOrder.where(payer_user_id: current_user.id, status: "success")
+                          .where(order_type: %w[payment transfer])
+                          .where("COALESCE(trade_time, created_at) > ?", cutoff)
+                          .where.not(id: existing_dispute_order_ids)
+                          .order(created_at: :desc)
+                          .limit(50)
+
+      user_ids = orders.map(&:payee_user_id).uniq.reject(&:zero?)
+      user_map = User.where(id: user_ids).index_by(&:id)
+
+      list = orders.map do |o|
+        {
+          id: o.id,
+          order_name: o.order_name,
+          amount: o.amount.to_f,
+          payee_username: user_map[o.payee_user_id]&.username,
+          created_at: o.created_at,
+        }
+      end
+
+      render json: { orders: list }
+    end
+
     # POST /credit/dispute.json — create dispute
     def create
       order_id = params[:order_id].to_i

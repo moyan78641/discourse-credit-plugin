@@ -80,6 +80,7 @@ class CreditPayPage extends Component {
         <a href="/credit" class="btn btn-default">返回钱包</a>
       {{else if this.order}}
         <div class="pay-order-card">
+          {{#if this.merchant.test_mode}}<div class="pay-test-badge">测试模式 — 不会实际扣款</div>{{/if}}
           <div class="pay-merchant">商户: {{this.merchant.name}}</div>
           <div class="pay-order-name">{{this.order.name}}</div>
           <div class="pay-amount">{{this.order.amount}} <span class="unit">积分</span></div>

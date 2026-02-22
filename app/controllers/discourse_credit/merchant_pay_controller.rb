@@ -167,7 +167,7 @@ module ::DiscourseCredit
           amount: order.amount.to_f,
           expires_at: order.expires_at,
         },
-        merchant: { name: app&.app_name },
+        merchant: { name: app&.app_name, test_mode: app&.test_mode || false },
       }
     end
 
@@ -185,46 +185,68 @@ module ::DiscourseCredit
         raise "订单不存在或已处理" unless order
         raise "订单已过期" if order.expires_at < Time.current
 
-        wallet.reload
-        raise "余额不足" if wallet.available_balance < order.amount
+        app = CreditMerchantApp.find_by(client_id: order.client_id)
 
-        fee = (order.amount * fee_rate).round(2)
-        merchant_amount = order.amount - fee
+        # Test mode: only merchant themselves can pay, no real deduction
+        if app&.test_mode
+          raise "测试模式仅允许商户本人支付" unless current_user.id == app.user_id
 
-        # Deduct payer
-        CreditWallet.where(id: wallet.id).update_all(
-          "available_balance = available_balance - #{order.amount}, " \
-          "total_payment = total_payment + #{order.amount}",
-        )
-
-        # Credit merchant
-        merchant_wallet = CreditWallet.find_by(user_id: order.payee_user_id)
-        if merchant_wallet
-          CreditWallet.where(id: merchant_wallet.id).update_all(
-            "available_balance = available_balance + #{merchant_amount}, " \
-            "total_receive = total_receive + #{merchant_amount}",
+          order.update!(
+            status: "success",
+            payer_user_id: current_user.id,
+            trade_time: Time.current,
+            remark: "[测试订单] 无实际扣款",
           )
+
+          stored = PluginStore.get("credit_notify", "order_#{order.id}")
+          return_url = stored&.dig("return_url")
+
+          Jobs.enqueue_in(2.seconds, :credit_merchant_notify, order_id: order.id)
+        else
+          # Real payment — cannot pay own orders
+          raise "不能给自己的商户应用付款" if current_user.id == order.payee_user_id
+
+          wallet.reload
+          raise "余额不足" if wallet.available_balance < order.amount
+
+          fee = (order.amount * fee_rate).round(2)
+          merchant_amount = order.amount - fee
+
+          # Deduct payer
+          CreditWallet.where(id: wallet.id).update_all(
+            "available_balance = available_balance - #{order.amount}, " \
+            "total_payment = total_payment + #{order.amount}",
+          )
+
+          # Credit merchant
+          merchant_wallet = CreditWallet.find_by(user_id: order.payee_user_id)
+          if merchant_wallet
+            CreditWallet.where(id: merchant_wallet.id).update_all(
+              "available_balance = available_balance + #{merchant_amount}, " \
+              "total_receive = total_receive + #{merchant_amount}",
+            )
+          end
+
+          order.update!(
+            status: "success",
+            payer_user_id: current_user.id,
+            trade_time: Time.current,
+            remark: "手续费: #{format('%.2f', fee)}",
+          )
+
+          # Get return URL
+          stored = PluginStore.get("credit_notify", "order_#{order.id}")
+          return_url = stored&.dig("return_url")
+
+          # Async notify via Discourse Jobs
+          Jobs.enqueue_in(2.seconds, :credit_merchant_notify, order_id: order.id)
         end
-
-        order.update!(
-          status: "success",
-          payer_user_id: current_user.id,
-          trade_time: Time.current,
-          remark: "手续费: #{format('%.2f', fee)}",
-        )
-
-        # Get return URL
-        stored = PluginStore.get("credit_notify", "order_#{order.id}")
-        return_url = stored&.dig("return_url")
-
-        # Async notify via Discourse Jobs
-        Jobs.enqueue_in(2.seconds, :credit_merchant_notify, order_id: order.id)
       end
 
       render json: { ok: true, return_url: return_url }
     rescue => e
-      msg = %w[余额不足 订单不存在 订单已过期 订单已处理].find { |k| e.message.include?(k) }
-      render json: { error: msg || "支付失败" }, status: 400
+      msg = %w[余额不足 订单不存在 订单已过期 订单已处理 测试模式 不能给自己].find { |k| e.message.include?(k) }
+      render json: { error: msg ? e.message : "支付失败" }, status: 400
     end
 
     private

@@ -41,6 +41,7 @@ module ::DiscourseCredit
       updates[:notify_url] = params[:notify_url] if params.key?(:notify_url)
       updates[:description] = params[:description] if params.key?(:description)
       updates[:is_active] = params[:is_active] if params.key?(:is_active)
+      updates[:test_mode] = params[:test_mode] if params.key?(:test_mode)
 
       app.update!(updates) if updates.any?
       app.reload

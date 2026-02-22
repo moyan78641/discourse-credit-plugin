@@ -150,6 +150,16 @@ class CreditMerchantPage extends Component {
     } catch (_) { /* ignore */ }
   }
 
+  @action async toggleTestMode(app) {
+    try {
+      await ajax(`/credit/merchant/apps/${app.id}.json`, {
+        type: "PUT",
+        data: { test_mode: !app.test_mode },
+      });
+      await this.loadApps();
+    } catch (_) { /* ignore */ }
+  }
+
   @action async resetSecret(appId) {
     if (!confirm("重置密钥后旧密钥立即失效，确定继续？")) return;
     try {
@@ -238,11 +248,22 @@ class CreditMerchantPage extends Component {
             <p>易支付接口地址：</p>
             <div class="credential-row">
               <span class="credential-label">提交地址</span>
-              <code class="credential-value">/credit-pay/submit.php</code>
+              <code class="credential-value">/credit/epay/submit</code>
+              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/submit")}}>复制</button>
             </div>
             <div class="credential-row">
-              <span class="credential-label">查询/退款</span>
-              <code class="credential-value">/credit-api.php</code>
+              <span class="credential-label">查询订单</span>
+              <code class="credential-value">/credit/epay/query</code>
+              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/query")}}>复制</button>
+            </div>
+            <div class="credential-row">
+              <span class="credential-label">退款</span>
+              <code class="credential-value">/credit/epay/refund</code>
+              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/refund")}}>复制</button>
+            </div>
+            <div class="credential-row">
+              <span class="credential-label">兼容地址</span>
+              <code class="credential-value">/credit-pay/submit.php</code>
             </div>
           </div>
           <button class="btn btn-small btn-default" type="button" {{on "click" this.dismissCreated}}>我已保存，关闭</button>
@@ -277,7 +298,10 @@ class CreditMerchantPage extends Component {
                   <span class="app-name">{{app.app_name}}</span>
                   {{#if app.description}}<span class="app-desc">{{app.description}}</span>{{/if}}
                 </div>
-                <span class="app-status-badge {{if app.is_active 'active' 'inactive'}}">{{if app.is_active "启用" "停用"}}</span>
+                <div class="app-header-right">
+                  {{#if app.test_mode}}<span class="app-test-badge">测试模式</span>{{/if}}
+                  <span class="app-status-badge {{if app.is_active 'active' 'inactive'}}">{{if app.is_active "启用" "停用"}}</span>
+                </div>
               </div>
 
               {{#if (eq this.expandedAppId app.id)}}
@@ -304,7 +328,8 @@ class CreditMerchantPage extends Component {
                     </div>
                     <div class="app-actions">
                       <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.startEditApp app)}}>{{icon "pen-to-square"}} 编辑</button>
-                      <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.toggleAppStatus app)}}>{{if app.is_active "停用" "启用"}}</button>
+                      <button class="btn btn-small {{if app.is_active 'btn-default' 'btn-primary'}}" type="button" {{on "click" (fn this.toggleAppStatus app)}}>{{if app.is_active "停用" "启用"}}</button>
+                      <button class="btn btn-small {{if app.test_mode 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.toggleTestMode app)}}>{{if app.test_mode "关闭测试" "开启测试"}}</button>
                       <button class="btn btn-small btn-danger" type="button" {{on "click" (fn this.resetSecret app.id)}}>{{icon "key"}} 重置密钥</button>
                     </div>
                   {{/if}}
@@ -340,6 +365,7 @@ class CreditMerchantPage extends Component {
                             <span class="product-price">{{p.price}} 积分</span>
                             <span class="product-stock">库存: {{if (eq p.stock -1) "无限" p.stock}}</span>
                             <span class="product-sold">已售: {{p.sold_count}}</span>
+                            <a href="/credit/product/{{p.id}}" class="btn btn-flat btn-small">{{icon "cart-shopping"}} 购买链接</a>
                             <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.toggleProductStatus p.id (eq p.status "active"))}}>
                               {{if (eq p.status "active") "下架" "上架"}}
                             </button>

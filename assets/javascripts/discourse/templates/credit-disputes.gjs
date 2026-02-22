@@ -15,7 +15,9 @@ class CreditDisputesPage extends Component {
   @tracked loading = true;
   @tracked error = null;
   @tracked showCreate = false;
-  @tracked newOrderId = "";
+  @tracked disputableOrders = [];
+  @tracked disputableLoading = false;
+  @tracked selectedOrderId = "";
   @tracked newReason = "";
   @tracked creating = false;
   @tracked reviewId = null;
@@ -45,22 +47,34 @@ class CreditDisputesPage extends Component {
     finally { this.loading = false; }
   }
 
-  @action toggleCreate() { this.showCreate = !this.showCreate; }
-  @action updateNewOrderId(e) { this.newOrderId = e.target.value; }
+  @action async toggleCreate() {
+    this.showCreate = !this.showCreate;
+    if (this.showCreate && this.disputableOrders.length === 0) {
+      this.disputableLoading = true;
+      try {
+        const data = await ajax("/credit/disputable-orders.json");
+        this.disputableOrders = data.orders || [];
+      } catch (_) { this.disputableOrders = []; }
+      finally { this.disputableLoading = false; }
+    }
+  }
+
+  @action updateSelectedOrder(e) { this.selectedOrderId = e.target.value; }
   @action updateNewReason(e) { this.newReason = e.target.value; }
 
   @action async createDispute() {
-    if (!this.newOrderId || !this.newReason) { this.error = "请填写订单ID和原因"; return; }
+    if (!this.selectedOrderId || !this.newReason) { this.error = "请选择订单并填写原因"; return; }
     this.creating = true;
     this.error = null;
     try {
       await ajax("/credit/dispute.json", {
         type: "POST",
-        data: { order_id: this.newOrderId, reason: this.newReason },
+        data: { order_id: this.selectedOrderId, reason: this.newReason },
       });
       this.showCreate = false;
-      this.newOrderId = "";
+      this.selectedOrderId = "";
       this.newReason = "";
+      this.disputableOrders = [];
       await this.loadDisputes();
     } catch (e) {
       this.error = e.jqXHR?.responseJSON?.error || "发起失败";
@@ -117,7 +131,21 @@ class CreditDisputesPage extends Component {
 
       {{#if this.showCreate}}
         <div class="credit-form-card">
-          <div class="form-row"><label>订单ID</label><input type="number" value={{this.newOrderId}} placeholder="输入订单ID" {{on "input" this.updateNewOrderId}} /></div>
+          <div class="form-row">
+            <label>选择订单</label>
+            {{#if this.disputableLoading}}
+              <p class="loading-text">加载可争议订单...</p>
+            {{else if this.disputableOrders.length}}
+              <select class="order-type-select" {{on "change" this.updateSelectedOrder}}>
+                <option value="">-- 请选择订单 --</option>
+                {{#each this.disputableOrders as |o|}}
+                  <option value={{o.id}}>#{{o.id}} {{o.order_name}} ({{o.amount}}积分 → {{o.payee_username}})</option>
+                {{/each}}
+              </select>
+            {{else}}
+              <p class="no-data-text">暂无可争议的订单（仅支付/转账成功且在争议时间窗口内的订单可发起争议）</p>
+            {{/if}}
+          </div>
           <div class="form-row"><label>争议原因</label><textarea maxlength="500" placeholder="请描述争议原因" {{on "input" this.updateNewReason}}>{{this.newReason}}</textarea></div>
           <button class="btn btn-primary" type="button" disabled={{this.creating}} {{on "click" this.createDispute}}>
             {{if this.creating "提交中..." "提交争议"}}

@@ -61,31 +61,16 @@ DiscourseCredit::Engine.routes.draw do
   # Merchant payment API (易支付 compatible)
   get  "/pay/order"   => "merchant_pay#get_order"
   post "/pay/confirm" => "merchant_pay#confirm"
+
+  # 易支付兼容接口 (挂在 /credit 下)
+  match "/epay/submit",  to: "merchant_pay#create_order", via: [:get, :post]
+  get   "/epay/query",   to: "merchant_pay#query_order"
+  post  "/epay/refund",  to: "merchant_pay#refund_order"
+
+  # 可争议订单列表
+  get "/disputable-orders" => "dispute#disputable_orders"
 end
 
 Discourse::Application.routes.draw do
   mount ::DiscourseCredit::Engine, at: "/credit"
-end
-
-# 易支付兼容接口 (top-level)
-Discourse::Application.routes.draw do
-  scope module: "discourse_credit" do
-    match "/credit-pay/submit.php", to: "merchant_pay#create_order", via: [:get, :post]
-    get   "/credit-api.php",        to: "merchant_pay#query_order"
-    post  "/credit-api.php",        to: "merchant_pay#refund_order"
-  end
-end
-
-# Top-level Ember page routes — Rails must serve the Ember shell for direct URL access
-Discourse::Application.routes.draw do
-  get "/credit" => "list#latest"
-  get "/credit/transfer" => "list#latest"
-  get "/credit/redenvelope" => "list#latest"
-  get "/credit/redenvelope/:id" => "list#latest"
-  get "/credit/merchant" => "list#latest"
-  get "/credit/product/:id" => "list#latest"
-  get "/credit/disputes" => "list#latest"
-  get "/credit/dashboard" => "list#latest"
-  get "/credit/admin" => "list#latest"
-  get "/credit/pay" => "list#latest"
 end
