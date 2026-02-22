@@ -12,18 +12,65 @@ export default apiInitializer("1.0", (api) => {
   });
 
   // 渲染帖子中的红包卡片
+  // 直接扫描 cooked HTML 中的 [credit-red-envelope id=xxx] 文本并替换
   api.decorateCookedElement(
-    (elem, helper) => {
-      if (!helper) return;
-      // 匹配 class 名为 credit-red-envelope-{id} 的 div
-      const envelopes = elem.querySelectorAll("[class*='credit-red-envelope-']");
-      envelopes.forEach((el) => {
-        const match = el.className.match(/credit-red-envelope-(\d+)/);
-        if (!match) return;
-        const envelopeId = match[1];
-        if (el.dataset.rendered) return;
+    (elem) => {
+      // 方法1: 查找已有的 wrap div (如果 markdown-it 成功生成了)
+      elem.querySelectorAll(".credit-red-envelope-wrap, [class*='credit-red-envelope-']").forEach((el) => {
+        const envelopeId = el.dataset?.envelopeId || el.className.match(/credit-red-envelope-(\d+)/)?.[1];
+        if (!envelopeId || el.dataset.rendered) return;
         el.dataset.rendered = "1";
         loadAndRenderEnvelope(el, envelopeId);
+      });
+
+      // 方法2: 扫描文本节点，找 [credit-red-envelope id=xxx]
+      const walker = document.createTreeWalker(elem, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (/\[credit-red-envelope\s+id=\d+\]/.test(node.textContent)) {
+          textNodes.push(node);
+        }
+      }
+
+      textNodes.forEach((textNode) => {
+        const text = textNode.textContent;
+        const regex = /\[credit-red-envelope\s+id=(\d+)\]/g;
+        let match;
+        const parts = [];
+        let lastIndex = 0;
+
+        while ((match = regex.exec(text)) !== null) {
+          // 前面的普通文本
+          if (match.index > lastIndex) {
+            parts.push(document.createTextNode(text.slice(lastIndex, match.index)));
+          }
+          // 红包占位 div
+          const div = document.createElement("div");
+          div.className = "credit-re-placeholder";
+          div.dataset.envelopeId = match[1];
+          div.textContent = "加载红包中...";
+          parts.push(div);
+          lastIndex = regex.lastIndex;
+        }
+
+        if (parts.length === 0) return;
+
+        // 剩余文本
+        if (lastIndex < text.length) {
+          parts.push(document.createTextNode(text.slice(lastIndex)));
+        }
+
+        // 替换原文本节点
+        const parent = textNode.parentNode;
+        parts.forEach((p) => parent.insertBefore(p, textNode));
+        parent.removeChild(textNode);
+
+        // 加载红包数据
+        parent.querySelectorAll(".credit-re-placeholder").forEach((el) => {
+          const eid = el.dataset.envelopeId;
+          if (eid) loadAndRenderEnvelope(el, eid);
+        });
       });
     },
     { id: "credit-red-envelope-card" }
@@ -31,7 +78,6 @@ export default apiInitializer("1.0", (api) => {
 });
 
 function showRedEnvelopeModal(toolbarEvent) {
-  // 移除已有弹窗
   document.getElementById("credit-re-overlay")?.remove();
 
   const overlay = document.createElement("div");
@@ -124,7 +170,6 @@ async function createRedEnvelope(toolbarEvent, overlay) {
       data: { type, amount, count, message, require_reply: requireReply, require_like: requireLike, require_keyword: requireKeyword, pay_key: payKey },
     });
 
-    // 插入红包标记到编辑器
     const tag = `\n[credit-red-envelope id=${result.id}]\n`;
     toolbarEvent.addText(tag);
     overlay.remove();
@@ -160,33 +205,26 @@ function renderEnvelopeCard(el, data) {
     ? ((data.total_count - data.remaining_count) / data.total_count * 100).toFixed(1)
     : 0;
 
+  let condBadges = "";
+  if (data.require_reply) condBadges += '<span class="re-reply-badge">需回复</span>';
+  if (data.require_like) condBadges += '<span class="re-reply-badge">需点赞</span>';
+  if (data.require_keyword) condBadges += `<span class="re-reply-badge">需含「${esc(data.require_keyword)}」</span>`;
+
   let html = `
     <div class="credit-re-card ${statusClass}">
       <div class="re-card-header">
         <svg class="fa d-icon d-icon-gift svg-icon svg-string" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><use href="#gift"></use></svg>
         <span class="re-card-title">${esc(data.sender_username)} 的${typeLabel}</span>
-        ${data.require_reply ? '<span class="re-reply-badge">需回复</span>' : ''}
-        ${data.require_like ? '<span class="re-reply-badge">需点赞</span>' : ''}
-        ${data.require_keyword ? `<span class="re-reply-badge">需含「${esc(data.require_keyword)}」</span>` : ''}
+        ${condBadges}
       </div>
       ${data.message ? `<div class="re-card-message">${esc(data.message)}</div>` : ''}
       <div class="re-card-stats">
-        <div class="re-stat">
-          <span class="re-stat-label">红包</span>
-          <span class="re-stat-value">${data.total_count - data.remaining_count}/${data.total_count}</span>
-        </div>
-        <div class="re-stat">
-          <span class="re-stat-label">积分</span>
-          <span class="re-stat-value">${(data.total_amount - data.remaining_amount).toFixed(2)}/${data.total_amount.toFixed(2)}</span>
-        </div>
+        <div class="re-stat"><span class="re-stat-label">红包</span><span class="re-stat-value">${data.total_count - data.remaining_count}/${data.total_count}</span></div>
+        <div class="re-stat"><span class="re-stat-label">积分</span><span class="re-stat-value">${(data.total_amount - data.remaining_amount).toFixed(2)}/${data.total_amount.toFixed(2)}</span></div>
       </div>
-      <div class="re-card-progress">
-        <div class="re-card-progress-bar" style="width: ${progressPct}%"></div>
-      </div>`;
+      <div class="re-card-progress"><div class="re-card-progress-bar" style="width: ${progressPct}%"></div></div>`;
 
-  if (statusText) {
-    html += `<div class="re-card-status ${statusClass}">${statusText}</div>`;
-  }
+  if (statusText) html += `<div class="re-card-status ${statusClass}">${statusText}</div>`;
   if (!isExhausted && !hasClaimed && !isExpired) {
     html += `<button class="btn btn-primary re-claim-btn" data-envelope-id="${data.id}">🧧 抢红包</button>`;
   }
