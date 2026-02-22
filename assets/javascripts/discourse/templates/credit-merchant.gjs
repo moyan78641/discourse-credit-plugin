@@ -245,24 +245,20 @@ class CreditMerchantPage extends Component {
             <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText this.createdApp.client_secret)}}>复制</button>
           </div>
           <div class="credential-tip">
-            <p>易支付接口地址：</p>
+            <p>易支付接口地址（完整URL需加上您的域名）：</p>
             <div class="credential-row">
               <span class="credential-label">提交地址</span>
               <code class="credential-value">/credit/pay/submit.php</code>
               <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/pay/submit.php")}}>复制</button>
             </div>
             <div class="credential-row">
-              <span class="credential-label">查询订单</span>
-              <code class="credential-value">/credit/api.php (GET)</code>
+              <span class="credential-label">查询订单 (GET)</span>
+              <code class="credential-value">/credit/api.php</code>
               <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/api.php")}}>复制</button>
             </div>
             <div class="credential-row">
-              <span class="credential-label">退款</span>
-              <code class="credential-value">/credit/api.php (POST)</code>
-            </div>
-            <div class="credential-row">
-              <span class="credential-label">顶层兼容</span>
-              <code class="credential-value">/pay/submit.php · /api.php</code>
+              <span class="credential-label">退款 (POST)</span>
+              <code class="credential-value">/credit/api.php</code>
             </div>
           </div>
           <button class="btn btn-small btn-default" type="button" {{on "click" this.dismissCreated}}>我已保存，关闭</button>

@@ -9,4 +9,8 @@ export default class CreditProductDetailRoute extends Route {
       this.router.replaceWith("discovery.latest");
     }
   }
+
+  model(params) {
+    return { id: params.id };
+  }
 }

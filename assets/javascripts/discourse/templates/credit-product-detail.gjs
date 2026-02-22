@@ -22,6 +22,8 @@ class CreditProductDetailPage extends Component {
   }
 
   get productId() {
+    // Try from Ember model first, fallback to URL
+    if (this.args.model?.id) return this.args.model.id;
     const match = window.location.pathname.match(/\/credit\/product\/(\d+)/);
     return match ? match[1] : null;
   }
