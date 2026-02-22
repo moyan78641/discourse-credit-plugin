@@ -4,28 +4,34 @@ import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 import { ajax } from "discourse/lib/ajax";
 
-export default class CreditTipButton extends Component {
+export default class CreditTipProfile extends Component {
   @service currentUser;
+
+  get shouldShow() {
+    const model = this.args.outletArgs?.model;
+    return model && this.currentUser && model.id !== this.currentUser.id;
+  }
 
   @action
   tipUser() {
-    const post = this.args.post;
-    const tipType = post.post_number === 1 ? "topic" : "comment";
-    showTipModal(post.user_id, post.id, tipType);
+    const model = this.args.outletArgs?.model;
+    if (!model) return;
+    showProfileTipModal(model.id);
   }
 
   <template>
-    <DButton
-      class="post-action-menu__credit-tip credit-tip-btn"
-      ...attributes
-      @action={{this.tipUser}}
-      @icon="hand-holding-heart"
-      @translatedTitle="打赏积分"
-    />
+    {{#if this.shouldShow}}
+      <DButton
+        class="btn btn-primary credit-profile-tip-btn"
+        @action={{this.tipUser}}
+        @icon="hand-holding-heart"
+        @translatedLabel="打赏"
+      />
+    {{/if}}
   </template>
 }
 
-function showTipModal(targetUserId, postId, tipType) {
+function showProfileTipModal(targetUserId) {
   document.getElementById("credit-tip-overlay")?.remove();
 
   const overlay = document.createElement("div");
@@ -60,11 +66,11 @@ function showTipModal(targetUserId, postId, tipType) {
   });
   document.getElementById("tip-cancel-btn").addEventListener("click", () => overlay.remove());
   document.getElementById("tip-confirm-btn").addEventListener("click", () => {
-    doTip(targetUserId, postId, tipType, overlay);
+    doProfileTip(targetUserId, overlay);
   });
 }
 
-async function doTip(targetUserId, postId, tipType, overlay) {
+async function doProfileTip(targetUserId, overlay) {
   const amount = document.getElementById("tip-amount")?.value;
   const payKey = document.getElementById("tip-pay-key")?.value;
   const errorEl = document.getElementById("tip-error");
@@ -85,7 +91,7 @@ async function doTip(targetUserId, postId, tipType, overlay) {
   try {
     const result = await ajax("/credit/tip.json", {
       type: "POST",
-      data: { target_user_id: targetUserId, amount, pay_key: payKey, tip_type: tipType, post_id: postId },
+      data: { target_user_id: targetUserId, amount, pay_key: payKey, tip_type: "profile" },
     });
 
     if (errorEl) errorEl.style.display = "none";
@@ -103,6 +109,3 @@ async function doTip(targetUserId, postId, tipType, overlay) {
     if (btn) { btn.disabled = false; btn.textContent = "确认打赏"; }
   }
 }
-
-// 导出给个人主页用
-export { showTipModal };
