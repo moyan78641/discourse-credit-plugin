@@ -73,3 +73,17 @@ Discourse::Application.routes.draw do
     post  "/credit-api.php",        to: "merchant_pay#refund_order"
   end
 end
+
+# Top-level Ember page routes — Rails must serve the Ember shell for direct URL access
+Discourse::Application.routes.draw do
+  get "/credit" => "list#latest"
+  get "/credit/transfer" => "list#latest"
+  get "/credit/redenvelope" => "list#latest"
+  get "/credit/redenvelope/:id" => "list#latest"
+  get "/credit/merchant" => "list#latest"
+  get "/credit/product/:id" => "list#latest"
+  get "/credit/disputes" => "list#latest"
+  get "/credit/dashboard" => "list#latest"
+  get "/credit/admin" => "list#latest"
+  get "/credit/pay" => "list#latest"
+end

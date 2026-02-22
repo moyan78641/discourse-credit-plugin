@@ -1,7 +1,7 @@
-import DiscourseRoute from "discourse/routes/discourse";
+import Route from "@ember/routing/route";
 import { service } from "@ember/service";
 
-export default class CreditRedenvelopeDetailRoute extends DiscourseRoute {
+export default class CreditRedenvelopeDetailRoute extends Route {
   @service router;
 
   beforeModel() {
