@@ -9,9 +9,10 @@ module ::DiscourseCredit
       products = CreditProduct.where(user_id: current_user.id).order(created_at: :desc)
       render json: {
         products: products.map { |p|
+          display_stock = p.auto_delivery ? p.card_keys.available.count : p.stock
           {
             id: p.id, name: p.name, description: p.description, price: p.price.to_f,
-            stock: p.stock, sold_count: p.sold_count, status: p.status,
+            stock: display_stock, sold_count: p.sold_count, status: p.status,
             auto_delivery: p.auto_delivery, delivery_message: p.delivery_message,
             card_key_count: p.auto_delivery ? p.card_keys.available.count : nil,
           }
@@ -21,15 +22,16 @@ module ::DiscourseCredit
 
     # POST /credit/merchant/products.json — 创建商品
     def create
+      is_auto = params[:auto_delivery] == "true" || params[:auto_delivery] == true
       product = CreditProduct.new(
         user_id: current_user.id,
         merchant_app_id: 0,
         name: params[:name],
         description: params[:description] || "",
         price: params[:price],
-        stock: params[:stock] || -1,
+        stock: is_auto ? 0 : (params[:stock] || -1),
         limit_per_user: params[:limit_per_user] || 0,
-        auto_delivery: params[:auto_delivery] == "true" || params[:auto_delivery] == true,
+        auto_delivery: is_auto,
         delivery_message: params[:delivery_message] || "",
         status: "active",
       )
@@ -107,9 +109,17 @@ module ::DiscourseCredit
       return render json: { error: "商品不存在" }, status: 404 unless product
 
       owner = User.find_by(id: product.user_id)
+
+      # 卡密商品库存 = 可用卡密数量
+      display_stock = if product.auto_delivery
+                        product.card_keys.available.count
+                      else
+                        product.stock
+                      end
+
       render json: {
         id: product.id, name: product.name, description: product.description,
-        price: product.price.to_f, stock: product.stock, sold_count: product.sold_count,
+        price: product.price.to_f, stock: display_stock, sold_count: product.sold_count,
         status: product.status, auto_delivery: product.auto_delivery,
         owner_username: owner&.username,
         in_stock: product.in_stock?,

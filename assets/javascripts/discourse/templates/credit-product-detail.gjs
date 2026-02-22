@@ -3,7 +3,6 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import icon from "discourse/helpers/d-icon";
 
@@ -24,9 +23,15 @@ class CreditProductDetailPage extends Component {
     const m = this.args.model;
     if (m?.id) return m.id;
     if (m?.params?.id) return m.params.id;
-    // URL fallback
     const match = window.location.pathname.match(/\/credit\/product\/(\d+)/);
     return match ? match[1] : null;
+  }
+
+  get stockDisplay() {
+    const p = this.product;
+    if (!p) return "";
+    if (p.stock === -1) return "无限";
+    return String(p.stock);
   }
 
   async loadProduct() {
@@ -68,14 +73,35 @@ class CreditProductDetailPage extends Component {
       {{else if this.product}}
         <div class="product-detail-card">
           <h2>{{this.product.name}}</h2>
-          <p class="product-merchant">卖家: @{{this.product.owner_username}}</p>
-          {{#if this.product.description}}<p class="product-description">{{this.product.description}}</p>{{/if}}
-          <div class="product-info-grid">
-            <div class="info-item"><span class="info-label">价格</span><span class="info-value price">{{this.product.price}} 积分</span></div>
-            <div class="info-item"><span class="info-label">库存</span><span class="info-value">{{if (eq this.product.stock -1) "无限" this.product.stock}}</span></div>
-            <div class="info-item"><span class="info-label">已售</span><span class="info-value">{{this.product.sold_count}}</span></div>
-            {{#if this.product.auto_delivery}}<div class="info-item"><span class="info-label">发货方式</span><span class="info-value">自动发货（站内信）</span></div>{{/if}}
+          <div class="product-detail-meta">
+            <span class="product-meta-item">卖家: @{{this.product.owner_username}}</span>
           </div>
+          {{#if this.product.description}}
+            <p class="product-description">{{this.product.description}}</p>
+          {{/if}}
+
+          <table class="product-detail-table">
+            <tbody>
+              <tr>
+                <td class="pd-label">价格</td>
+                <td class="pd-value pd-price">{{this.product.price}} 积分</td>
+              </tr>
+              <tr>
+                <td class="pd-label">库存</td>
+                <td class="pd-value">{{this.stockDisplay}}</td>
+              </tr>
+              <tr>
+                <td class="pd-label">已售</td>
+                <td class="pd-value">{{this.product.sold_count}}</td>
+              </tr>
+              {{#if this.product.auto_delivery}}
+                <tr>
+                  <td class="pd-label">发货方式</td>
+                  <td class="pd-value">自动发货（站内信）</td>
+                </tr>
+              {{/if}}
+            </tbody>
+          </table>
 
           {{#if this.buyResult}}
             <div class="credit-success">

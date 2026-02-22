@@ -228,13 +228,17 @@
 
 .product-detail-card {
   background: var(--primary-very-low); border-radius: 12px; padding: 24px;
-  .product-merchant { color: var(--primary-medium); margin-bottom: 8px; }
-  .product-description { margin-bottom: 16px; }
+  h2 { margin: 0 0 8px; }
+  .product-detail-meta { color: var(--primary-medium); margin-bottom: 12px; font-size: 0.9em; }
+  .product-description { margin-bottom: 16px; line-height: 1.5; }
 }
 
-.product-info-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;
-  .info-item { .info-label { font-size: 0.8em; color: var(--primary-medium); display: block; } .info-value { font-weight: 600; &.price { color: var(--tertiary); font-size: 1.2em; } } }
+.product-detail-table {
+  width: 100%; border-collapse: collapse; margin-bottom: 16px;
+  td { padding: 10px 12px; border-bottom: 1px solid var(--primary-low); }
+  .pd-label { font-weight: 600; color: var(--primary-medium); width: 100px; font-size: 0.9em; }
+  .pd-value { font-weight: 500; }
+  .pd-price { color: var(--tertiary); font-size: 1.2em; font-weight: 700; }
 }
 
 .product-buy-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--primary-low); }
@@ -496,5 +500,5 @@
 @media (max-width: 600px) {
   .credit-wallet-card .wallet-stats { grid-template-columns: repeat(2, 1fr); }
   .admin-stats-grid { grid-template-columns: 1fr; }
-  .product-info-grid { grid-template-columns: 1fr; }
+  .product-detail-table { font-size: 0.9em; }
 }

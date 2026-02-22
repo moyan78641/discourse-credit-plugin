@@ -156,11 +156,13 @@ class CreditMerchantPage extends Component {
           <div class="form-row"><label>商品名称</label><input type="text" value={{this.newName}} placeholder="商品名称" {{on "input" this.updateNewName}} /></div>
           <div class="form-row"><label>价格（积分）</label><input type="number" min="0.01" step="0.01" value={{this.newPrice}} {{on "input" this.updateNewPrice}} /></div>
           <div class="form-row"><label>描述</label><textarea maxlength="500" placeholder="商品描述（选填）" {{on "input" this.updateNewDesc}}>{{this.newDesc}}</textarea></div>
-          <div class="form-row"><label>库存（-1无限）</label><input type="number" value={{this.newStock}} {{on "input" this.updateNewStock}} /></div>
-          <div class="form-row"><label>限购（0不限）</label><input type="number" min="0" value={{this.newLimit}} {{on "input" this.updateNewLimit}} /></div>
           <div class="form-row">
             <label><input type="checkbox" checked={{this.newAutoDelivery}} {{on "click" this.toggleAutoDelivery}} /> 自动发货（发卡密）</label>
           </div>
+          {{#unless this.newAutoDelivery}}
+            <div class="form-row"><label>库存（-1无限）</label><input type="number" value={{this.newStock}} {{on "input" this.updateNewStock}} /></div>
+          {{/unless}}
+          <div class="form-row"><label>限购（0不限）</label><input type="number" min="0" value={{this.newLimit}} {{on "input" this.updateNewLimit}} /></div>
           {{#if this.newAutoDelivery}}
             <div class="form-row"><label>发货附言</label><input type="text" value={{this.newDeliveryMsg}} placeholder="站内信附言（选填）" {{on "input" this.updateDeliveryMsg}} /></div>
           {{/if}}
@@ -194,10 +196,12 @@ class CreditMerchantPage extends Component {
                       <div class="form-row"><label>名称</label><input type="text" value={{this.editFields.name}} {{on "input" (fn this.updateEditField "name")}} /></div>
                       <div class="form-row"><label>价格</label><input type="number" min="0.01" step="0.01" value={{this.editFields.price}} {{on "input" (fn this.updateEditField "price")}} /></div>
                       <div class="form-row"><label>描述</label><input type="text" value={{this.editFields.description}} {{on "input" (fn this.updateEditField "description")}} /></div>
-                      <div class="form-row"><label>库存</label><input type="number" value={{this.editFields.stock}} {{on "input" (fn this.updateEditField "stock")}} /></div>
                       <div class="form-row">
                         <label><input type="checkbox" checked={{this.editFields.auto_delivery}} {{on "click" this.toggleEditAutoDelivery}} /> 自动发货</label>
                       </div>
+                      {{#unless this.editFields.auto_delivery}}
+                        <div class="form-row"><label>库存</label><input type="number" value={{this.editFields.stock}} {{on "input" (fn this.updateEditField "stock")}} /></div>
+                      {{/unless}}
                       {{#if this.editFields.auto_delivery}}
                         <div class="form-row"><label>发货附言</label><input type="text" value={{this.editFields.delivery_message}} {{on "input" (fn this.updateEditField "delivery_message")}} /></div>
                       {{/if}}
@@ -209,7 +213,8 @@ class CreditMerchantPage extends Component {
                   {{else}}
                     <div class="product-info-grid">
                       {{#if p.description}}<div class="info-row"><span class="info-label">描述</span><span class="info-value">{{p.description}}</span></div>{{/if}}
-                      <div class="info-row"><span class="info-label">库存</span><span class="info-value">{{if (eq p.stock -1) "无限" p.stock}}</span></div>
+                      {{#if p.auto_delivery}}<div class="info-row"><span class="info-label">卡密库存</span><span class="info-value">{{p.card_key_count}}</span></div>{{/if}}
+                      {{#unless p.auto_delivery}}<div class="info-row"><span class="info-label">库存</span><span class="info-value">{{if (eq p.stock -1) "无限" p.stock}}</span></div>{{/unless}}
                       <div class="info-row"><span class="info-label">已售</span><span class="info-value">{{p.sold_count}}</span></div>
                       {{#if p.auto_delivery}}<div class="info-row"><span class="info-label">可用卡密</span><span class="info-value">{{p.card_key_count}}</span></div>{{/if}}
                       <div class="info-row"><span class="info-label">购买链接</span><span class="info-value"><a href="/credit/product/{{p.id}}">/credit/product/{{p.id}}</a> <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyLink p.id)}}>复制</button></span></div>

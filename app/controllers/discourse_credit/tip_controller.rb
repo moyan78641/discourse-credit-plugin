@@ -60,7 +60,7 @@ module ::DiscourseCredit
           order_name: "打赏 @#{target_user.username}",
           payer_user_id: current_user.id,
           payee_user_id: target_user_id,
-          amount: amount,
+          amount: total_deduct,
           fee_rate: fee_rate,
           fee_amount: fee_amount,
           actual_amount: amount,
