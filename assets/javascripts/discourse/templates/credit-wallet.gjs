@@ -147,7 +147,7 @@ class CreditWalletPage extends Component {
             <div class="wallet-stats">
               <div class="stat-item"><span class="stat-label">总收入</span><span class="stat-value">{{this.wallet.total_receive}}</span></div>
               <div class="stat-item"><span class="stat-label">总支出</span><span class="stat-value">{{this.wallet.total_payment}}</span></div>
-              <div class="stat-item"><span class="stat-label">社区积分</span><span class="stat-value">{{this.wallet.community_balance}}</span></div>
+              <div class="stat-item"><span class="stat-label">基准分数</span><span class="stat-value">{{this.wallet.initial_leaderboard_score}}</span></div>
             </div>
             <div class="wallet-actions">
               <a href="/credit/merchant" class="btn btn-default">{{icon "store"}} 商户</a>

@@ -4,7 +4,7 @@ import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
-import { eq } from "truth-helpers";
+import { eq, not } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import icon from "discourse/helpers/d-icon";
 
@@ -29,6 +29,7 @@ class CreditMerchantPage extends Component {
   @tracked editingId = null;
   @tracked editFields = {};
   @tracked editSaving = false;
+  @tracked deleting = false;
 
   constructor() {
     super(...arguments);
@@ -60,7 +61,8 @@ class CreditMerchantPage extends Component {
         type: "POST",
         data: {
           name: this.newName, price: this.newPrice, description: this.newDesc,
-          stock: this.newStock, limit_per_user: this.newLimit,
+          stock: this.newAutoDelivery ? "0" : this.newStock,
+          limit_per_user: this.newLimit,
           auto_delivery: this.newAutoDelivery, delivery_message: this.newDeliveryMsg,
         },
       });
@@ -111,16 +113,26 @@ class CreditMerchantPage extends Component {
 
   @action startEdit(p) {
     this.editingId = p.id;
-    this.editFields = { name: p.name, price: p.price, description: p.description || "", stock: p.stock, limit_per_user: p.limit_per_user || 0, auto_delivery: p.auto_delivery, delivery_message: p.delivery_message || "" };
+    this.editFields = {
+      name: p.name, price: p.price, description: p.description || "",
+      stock: p.stock, limit_per_user: p.limit_per_user || 0,
+      auto_delivery: !!p.auto_delivery, delivery_message: p.delivery_message || "",
+    };
   }
   @action cancelEdit() { this.editingId = null; }
-  @action updateEditField(field, e) { this.editFields = { ...this.editFields, [field]: e.target.value }; }
-  @action toggleEditAutoDelivery() { this.editFields = { ...this.editFields, auto_delivery: !this.editFields.auto_delivery }; }
+  @action updateEditField(field, e) {
+    this.editFields = { ...this.editFields, [field]: e.target.value };
+  }
+  @action toggleEditAutoDelivery() {
+    this.editFields = { ...this.editFields, auto_delivery: !this.editFields.auto_delivery };
+  }
 
   @action async saveEdit() {
     this.editSaving = true;
     try {
-      await ajax(`/credit/merchant/products/${this.editingId}.json`, { type: "PUT", data: this.editFields });
+      await ajax(`/credit/merchant/products/${this.editingId}.json`, {
+        type: "PUT", data: this.editFields,
+      });
       this.editingId = null;
       await this.loadProducts();
     } catch (e) {
@@ -130,9 +142,24 @@ class CreditMerchantPage extends Component {
 
   @action async toggleStatus(p) {
     try {
-      await ajax(`/credit/merchant/products/${p.id}.json`, { type: "PUT", data: { status: p.status === "active" ? "inactive" : "active" } });
+      await ajax(`/credit/merchant/products/${p.id}.json`, {
+        type: "PUT",
+        data: { status: p.status === "active" ? "inactive" : "active" },
+      });
       await this.loadProducts();
     } catch (_) { /* ignore */ }
+  }
+
+  @action async deleteProduct(p) {
+    if (!confirm(`确定删除商品「${p.name}」？此操作不可恢复。`)) return;
+    this.deleting = true;
+    try {
+      await ajax(`/credit/merchant/products/${p.id}.json`, { type: "DELETE" });
+      this.expandedId = null;
+      await this.loadProducts();
+    } catch (e) {
+      this.error = e.jqXHR?.responseJSON?.error || "删除失败";
+    } finally { this.deleting = false; }
   }
 
   @action copyLink(productId) {
@@ -153,18 +180,36 @@ class CreditMerchantPage extends Component {
 
       {{#if this.showCreate}}
         <div class="credit-form-card">
-          <div class="form-row"><label>商品名称</label><input type="text" value={{this.newName}} placeholder="商品名称" {{on "input" this.updateNewName}} /></div>
-          <div class="form-row"><label>价格（积分）</label><input type="number" min="0.01" step="0.01" value={{this.newPrice}} {{on "input" this.updateNewPrice}} /></div>
-          <div class="form-row"><label>描述</label><textarea maxlength="500" placeholder="商品描述（选填）" {{on "input" this.updateNewDesc}}>{{this.newDesc}}</textarea></div>
           <div class="form-row">
-            <label><input type="checkbox" checked={{this.newAutoDelivery}} {{on "click" this.toggleAutoDelivery}} /> 自动发货（发卡密）</label>
+            <label>商品名称</label>
+            <input type="text" value={{this.newName}} placeholder="商品名称" {{on "input" this.updateNewName}} />
           </div>
-          {{#unless this.newAutoDelivery}}
-            <div class="form-row"><label>库存（-1无限）</label><input type="number" value={{this.newStock}} {{on "input" this.updateNewStock}} /></div>
-          {{/unless}}
-          <div class="form-row"><label>限购（0不限）</label><input type="number" min="0" value={{this.newLimit}} {{on "input" this.updateNewLimit}} /></div>
+          <div class="form-row">
+            <label>价格（积分）</label>
+            <input type="number" min="0.01" step="0.01" value={{this.newPrice}} {{on "input" this.updateNewPrice}} />
+          </div>
+          <div class="form-row">
+            <label>描述</label>
+            <textarea maxlength="500" placeholder="商品描述（选填）" {{on "input" this.updateNewDesc}}>{{this.newDesc}}</textarea>
+          </div>
+          <div class="form-row">
+            <label><input type="checkbox" checked={{this.newAutoDelivery}} {{on "click" this.toggleAutoDelivery}} /> 自动发货（发卡密，库存由卡密数量决定）</label>
+          </div>
+          {{#if (not this.newAutoDelivery)}}
+            <div class="form-row">
+              <label>库存（-1为无限）</label>
+              <input type="number" value={{this.newStock}} {{on "input" this.updateNewStock}} />
+            </div>
+          {{/if}}
+          <div class="form-row">
+            <label>限购（0为不限）</label>
+            <input type="number" min="0" value={{this.newLimit}} {{on "input" this.updateNewLimit}} />
+          </div>
           {{#if this.newAutoDelivery}}
-            <div class="form-row"><label>发货附言</label><input type="text" value={{this.newDeliveryMsg}} placeholder="站内信附言（选填）" {{on "input" this.updateDeliveryMsg}} /></div>
+            <div class="form-row">
+              <label>发货附言</label>
+              <input type="text" value={{this.newDeliveryMsg}} placeholder="站内信附言（选填）" {{on "input" this.updateDeliveryMsg}} />
+            </div>
           {{/if}}
           <button class="btn btn-primary" type="button" disabled={{this.creating}} {{on "click" this.createProduct}}>
             {{if this.creating "创建中..." "确认创建"}}
@@ -185,7 +230,9 @@ class CreditMerchantPage extends Component {
                 </div>
                 <div class="product-card-right">
                   {{#if p.auto_delivery}}<span class="auto-delivery-badge">自动发货</span>{{/if}}
-                  <span class="product-status-badge {{if (eq p.status 'active') 'active' 'inactive'}}">{{if (eq p.status "active") "上架" "下架"}}</span>
+                  <span class="product-status-badge {{if (eq p.status 'active') 'active' 'inactive'}}">
+                    {{if (eq p.status "active") "上架" "下架"}}
+                  </span>
                 </div>
               </div>
 
@@ -199,9 +246,9 @@ class CreditMerchantPage extends Component {
                       <div class="form-row">
                         <label><input type="checkbox" checked={{this.editFields.auto_delivery}} {{on "click" this.toggleEditAutoDelivery}} /> 自动发货</label>
                       </div>
-                      {{#unless this.editFields.auto_delivery}}
+                      {{#if (not this.editFields.auto_delivery)}}
                         <div class="form-row"><label>库存</label><input type="number" value={{this.editFields.stock}} {{on "input" (fn this.updateEditField "stock")}} /></div>
-                      {{/unless}}
+                      {{/if}}
                       {{#if this.editFields.auto_delivery}}
                         <div class="form-row"><label>发货附言</label><input type="text" value={{this.editFields.delivery_message}} {{on "input" (fn this.updateEditField "delivery_message")}} /></div>
                       {{/if}}
@@ -212,20 +259,34 @@ class CreditMerchantPage extends Component {
                     </div>
                   {{else}}
                     <div class="product-info-grid">
-                      {{#if p.description}}<div class="info-row"><span class="info-label">描述</span><span class="info-value">{{p.description}}</span></div>{{/if}}
-                      {{#if p.auto_delivery}}<div class="info-row"><span class="info-label">卡密库存</span><span class="info-value">{{p.card_key_count}}</span></div>{{/if}}
-                      {{#unless p.auto_delivery}}<div class="info-row"><span class="info-label">库存</span><span class="info-value">{{if (eq p.stock -1) "无限" p.stock}}</span></div>{{/unless}}
+                      {{#if p.description}}
+                        <div class="info-row"><span class="info-label">描述</span><span class="info-value">{{p.description}}</span></div>
+                      {{/if}}
+                      {{#if p.auto_delivery}}
+                        <div class="info-row"><span class="info-label">卡密库存</span><span class="info-value">{{p.card_key_count}}</span></div>
+                      {{else}}
+                        <div class="info-row"><span class="info-label">库存</span><span class="info-value">{{if (eq p.stock -1) "无限" p.stock}}</span></div>
+                      {{/if}}
                       <div class="info-row"><span class="info-label">已售</span><span class="info-value">{{p.sold_count}}</span></div>
-                      {{#if p.auto_delivery}}<div class="info-row"><span class="info-label">可用卡密</span><span class="info-value">{{p.card_key_count}}</span></div>{{/if}}
-                      <div class="info-row"><span class="info-label">购买链接</span><span class="info-value"><a href="/credit/product/{{p.id}}">/credit/product/{{p.id}}</a> <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyLink p.id)}}>复制</button></span></div>
+                      <div class="info-row">
+                        <span class="info-label">购买链接</span>
+                        <span class="info-value">
+                          <a href="/credit/product/{{p.id}}">/credit/product/{{p.id}}</a>
+                          <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyLink p.id)}}>复制</button>
+                        </span>
+                      </div>
                     </div>
                     <div class="product-actions">
                       <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.startEdit p)}}>{{icon "pen-to-square"}} 编辑</button>
-                      <button class="btn btn-small {{if (eq p.status 'active') 'btn-default' 'btn-primary'}}" type="button" {{on "click" (fn this.toggleStatus p)}}>{{if (eq p.status "active") "下架" "上架"}}</button>
+                      <button class="btn btn-small {{if (eq p.status 'active') 'btn-default' 'btn-primary'}}" type="button" {{on "click" (fn this.toggleStatus p)}}>
+                        {{if (eq p.status "active") "下架" "上架"}}
+                      </button>
+                      <button class="btn btn-small btn-danger" type="button" disabled={{this.deleting}} {{on "click" (fn this.deleteProduct p)}}>
+                        {{icon "xmark"}} 删除
+                      </button>
                     </div>
                   {{/if}}
 
-                  {{!-- 卡密管理 --}}
                   {{#if p.auto_delivery}}
                     <div class="card-keys-section">
                       <h4>卡密管理</h4>

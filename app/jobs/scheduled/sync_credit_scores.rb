@@ -15,41 +15,41 @@ module Jobs
         next unless user&.active
 
         current_score = fetch_gamification_score(user.id)
-        delta = current_score - wallet.initial_leaderboard_score
-        # delta 可以是负数（违规扣分后分数低于注册基准）
-        target_community = [delta, 0].max
+        baseline = wallet.initial_leaderboard_score
+        delta = current_score - baseline
 
-        diff = BigDecimal(target_community.to_s) - wallet.community_balance
-        next if diff == 0
+        # 没变化就跳过
+        next if delta == 0
 
         ActiveRecord::Base.transaction do
-          if diff > 0
-            # 分数增加，加积分
+          if delta > 0
+            # 分数比基准高，发积分
             CreditWallet.where(id: wallet.id).update_all(
-              "available_balance = available_balance + #{diff}, " \
-              "community_balance = #{target_community}, " \
-              "total_community = total_community + #{diff}, " \
-              "total_receive = total_receive + #{diff}",
+              "available_balance = available_balance + #{delta}, " \
+              "community_balance = community_balance + #{delta}, " \
+              "total_community = total_community + #{delta}, " \
+              "total_receive = total_receive + #{delta}, " \
+              "initial_leaderboard_score = #{current_score}",
             )
 
             CreditOrder.create!(
-              order_name: "社区积分同步",
+              order_name: "社区积分发放",
               payer_user_id: 0,
               payee_user_id: wallet.user_id,
-              amount: diff,
+              amount: delta,
               status: "success",
               order_type: "community",
-              remark: "积分增加 (当前:#{current_score}, 基准:#{wallet.initial_leaderboard_score}, 社区积分:#{target_community})",
+              remark: "社区划转 #{delta} 积分",
               trade_time: Time.current,
-              expires_at: Time.current,
             )
           else
-            # 分数减少，扣积分（diff 是负数，取绝对值）
-            deduct = diff.abs
+            # 分数比基准低，扣积分
+            deduct = delta.abs
             CreditWallet.where(id: wallet.id).update_all(
               "available_balance = GREATEST(available_balance - #{deduct}, 0), " \
-              "community_balance = #{target_community}, " \
-              "total_community = GREATEST(total_community - #{deduct}, 0)",
+              "community_balance = GREATEST(community_balance - #{deduct}, 0), " \
+              "total_community = GREATEST(total_community - #{deduct}, 0), " \
+              "initial_leaderboard_score = #{current_score}",
             )
 
             CreditOrder.create!(
@@ -59,9 +59,8 @@ module Jobs
               amount: deduct,
               status: "success",
               order_type: "community",
-              remark: "积分扣减 (当前:#{current_score}, 基准:#{wallet.initial_leaderboard_score}, 社区积分:#{target_community})",
+              remark: "社区扣减 #{deduct} 积分",
               trade_time: Time.current,
-              expires_at: Time.current,
             )
           end
         end

@@ -6,6 +6,6 @@ plugins:
     default: ""
     client: true
   credit_new_user_balance:
-    default: 0
+    default: 100
     min: 0
     client: true

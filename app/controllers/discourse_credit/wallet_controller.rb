@@ -142,7 +142,7 @@ module ::DiscourseCredit
       wallet = CreditWallet.find_by(user_id: current_user.id)
       return wallet if wallet
 
-      initial_score = fetch_gamification_score(current_user.id)
+      initial_score = fetch_gamification_score(current_user.id)  # 记录当前分数作为基准
       initial_credit = SiteSetting.credit_new_user_balance.to_d
 
       wallet = CreditWallet.create!(
@@ -151,9 +151,12 @@ module ::DiscourseCredit
         initial_leaderboard_score: initial_score,
         available_balance: initial_credit,
         total_receive: initial_credit,
+        community_balance: 0,
+        total_community: 0,
         is_admin: current_user.admin?,
       )
 
+      # 注册奖励订单
       if initial_credit > 0
         CreditOrder.create!(
           order_name: "新用户注册奖励",
@@ -169,6 +172,18 @@ module ::DiscourseCredit
           trade_time: Time.current,
         )
       end
+
+      # 记录开通信息，方便用户了解基准
+      CreditOrder.create!(
+        order_name: "开通积分钱包",
+        payer_user_id: 0,
+        payee_user_id: current_user.id,
+        amount: 0,
+        status: "success",
+        order_type: "community",
+        remark: "开通钱包，基准分数: #{initial_score}",
+        trade_time: Time.current,
+      )
 
       wallet
     end
