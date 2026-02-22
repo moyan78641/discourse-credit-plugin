@@ -248,22 +248,21 @@ class CreditMerchantPage extends Component {
             <p>易支付接口地址：</p>
             <div class="credential-row">
               <span class="credential-label">提交地址</span>
-              <code class="credential-value">/credit/epay/submit</code>
-              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/submit")}}>复制</button>
+              <code class="credential-value">/credit/pay/submit.php</code>
+              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/pay/submit.php")}}>复制</button>
             </div>
             <div class="credential-row">
               <span class="credential-label">查询订单</span>
-              <code class="credential-value">/credit/epay/query</code>
-              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/query")}}>复制</button>
+              <code class="credential-value">/credit/api.php (GET)</code>
+              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/api.php")}}>复制</button>
             </div>
             <div class="credential-row">
               <span class="credential-label">退款</span>
-              <code class="credential-value">/credit/epay/refund</code>
-              <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText "/credit/epay/refund")}}>复制</button>
+              <code class="credential-value">/credit/api.php (POST)</code>
             </div>
             <div class="credential-row">
-              <span class="credential-label">兼容地址</span>
-              <code class="credential-value">/credit-pay/submit.php</code>
+              <span class="credential-label">顶层兼容</span>
+              <code class="credential-value">/pay/submit.php · /api.php</code>
             </div>
           </div>
           <button class="btn btn-small btn-default" type="button" {{on "click" this.dismissCreated}}>我已保存，关闭</button>

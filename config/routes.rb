@@ -62,10 +62,10 @@ DiscourseCredit::Engine.routes.draw do
   get  "/pay/order"   => "merchant_pay#get_order"
   post "/pay/confirm" => "merchant_pay#confirm"
 
-  # 易支付兼容接口 (挂在 /credit 下)
-  match "/epay/submit",  to: "merchant_pay#create_order", via: [:get, :post]
-  get   "/epay/query",   to: "merchant_pay#query_order"
-  post  "/epay/refund",  to: "merchant_pay#refund_order"
+  # 易支付兼容接口 (与 credit-master 原版一致)
+  match "/pay/submit.php",  to: "merchant_pay#create_order", via: [:get, :post]
+  get   "/api.php",         to: "merchant_pay#query_order"
+  post  "/api.php",         to: "merchant_pay#refund_order"
 
   # 可争议订单列表
   get "/disputable-orders" => "dispute#disputable_orders"
