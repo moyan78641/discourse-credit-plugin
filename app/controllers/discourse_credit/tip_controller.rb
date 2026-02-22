@@ -33,10 +33,10 @@ module ::DiscourseCredit
       wallet = current_wallet!
       fee_rate = config_get_f("tip_fee_rate")
       fee_amount = (amount * fee_rate).round(2)
-      actual_amount = (amount - fee_amount).round(2)
+      total_deduct = amount + fee_amount  # 手续费额外扣除
 
-      if wallet.available_balance < amount
-        return render json: { error: "余额不足" }, status: 400
+      if wallet.available_balance < total_deduct
+        return render json: { error: "余额不足（含手续费 #{fee_amount}）" }, status: 400
       end
 
       target_wallet = CreditWallet.find_by(user_id: target_user_id)
@@ -53,8 +53,8 @@ module ::DiscourseCredit
       remark += " (帖子##{post_id})" if post_id.present?
 
       ActiveRecord::Base.transaction do
-        wallet.update!(available_balance: wallet.available_balance - amount, total_payment: wallet.total_payment + amount)
-        target_wallet.update!(available_balance: target_wallet.available_balance + actual_amount, total_receive: target_wallet.total_receive + actual_amount)
+        wallet.update!(available_balance: wallet.available_balance - total_deduct, total_payment: wallet.total_payment + total_deduct)
+        target_wallet.update!(available_balance: target_wallet.available_balance + amount, total_receive: target_wallet.total_receive + amount)
 
         order = CreditOrder.create!(
           order_name: "打赏 @#{target_user.username}",
@@ -63,7 +63,7 @@ module ::DiscourseCredit
           amount: amount,
           fee_rate: fee_rate,
           fee_amount: fee_amount,
-          actual_amount: actual_amount,
+          actual_amount: amount,
           status: "success",
           order_type: "tip",
           remark: remark,
@@ -71,7 +71,7 @@ module ::DiscourseCredit
           trade_time: Time.current,
         )
 
-        render json: { success: true, order_no: order.order_no, amount: amount, fee_amount: fee_amount, actual_amount: actual_amount }
+        render json: { success: true, order_no: order.order_no, amount: amount, fee_amount: fee_amount, actual_amount: amount, total_deduct: total_deduct }
       end
     end
 
@@ -83,7 +83,7 @@ module ::DiscourseCredit
       user_ids = tips.map(&:payer_user_id).uniq
       users = User.where(id: user_ids).index_by(&:id)
 
-      total = tips.sum(:actual_amount).to_f
+      total = tips.sum(:amount).to_f
 
       render json: {
         total_amount: total,
@@ -93,7 +93,7 @@ module ::DiscourseCredit
           {
             username: u&.username,
             avatar_template: u&.avatar_template,
-            amount: t.actual_amount.to_f,
+            amount: t.amount.to_f,
             created_at: t.created_at&.iso8601,
           }
         },

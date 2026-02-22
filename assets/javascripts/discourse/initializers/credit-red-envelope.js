@@ -15,10 +15,14 @@ export default apiInitializer("1.0", (api) => {
   api.decorateCookedElement(
     (elem, helper) => {
       if (!helper) return;
-      const envelopes = elem.querySelectorAll(".credit-red-envelope-wrap");
+      // 匹配 class 名为 credit-red-envelope-{id} 的 div
+      const envelopes = elem.querySelectorAll("[class*='credit-red-envelope-']");
       envelopes.forEach((el) => {
-        const envelopeId = el.dataset.envelopeId;
-        if (!envelopeId) return;
+        const match = el.className.match(/credit-red-envelope-(\d+)/);
+        if (!match) return;
+        const envelopeId = match[1];
+        if (el.dataset.rendered) return;
+        el.dataset.rendered = "1";
         loadAndRenderEnvelope(el, envelopeId);
       });
     },
@@ -57,7 +61,15 @@ function showRedEnvelopeModal(toolbarEvent) {
           <input type="text" id="re-message" maxlength="50" placeholder="恭喜发财，大吉大利" />
         </div>
         <div class="form-row">
-          <label><input type="checkbox" id="re-require-reply" /> 需要回复后才能领取</label>
+          <label>领取条件</label>
+          <div class="re-conditions">
+            <label><input type="checkbox" id="re-require-reply" /> 需要回复</label>
+            <label><input type="checkbox" id="re-require-like" /> 需要点赞</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>回复指定内容（选填）</label>
+          <input type="text" id="re-require-keyword" maxlength="100" placeholder="留空则不限制回复内容" />
         </div>
         <div class="form-row">
           <label>支付密码</label>
@@ -89,6 +101,8 @@ async function createRedEnvelope(toolbarEvent, overlay) {
   const count = document.getElementById("re-count")?.value;
   const message = document.getElementById("re-message")?.value || "";
   const requireReply = document.getElementById("re-require-reply")?.checked || false;
+  const requireLike = document.getElementById("re-require-like")?.checked || false;
+  const requireKeyword = document.getElementById("re-require-keyword")?.value || "";
   const payKey = document.getElementById("re-pay-key")?.value;
   const errorEl = document.getElementById("re-error");
 
@@ -107,7 +121,7 @@ async function createRedEnvelope(toolbarEvent, overlay) {
   try {
     const result = await ajax("/credit/redenvelope/create.json", {
       type: "POST",
-      data: { type, amount, count, message, require_reply: requireReply, pay_key: payKey },
+      data: { type, amount, count, message, require_reply: requireReply, require_like: requireLike, require_keyword: requireKeyword, pay_key: payKey },
     });
 
     // 插入红包标记到编辑器
@@ -152,6 +166,8 @@ function renderEnvelopeCard(el, data) {
         <svg class="fa d-icon d-icon-gift svg-icon svg-string" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><use href="#gift"></use></svg>
         <span class="re-card-title">${esc(data.sender_username)} 的${typeLabel}</span>
         ${data.require_reply ? '<span class="re-reply-badge">需回复</span>' : ''}
+        ${data.require_like ? '<span class="re-reply-badge">需点赞</span>' : ''}
+        ${data.require_keyword ? `<span class="re-reply-badge">需含「${esc(data.require_keyword)}」</span>` : ''}
       </div>
       ${data.message ? `<div class="re-card-message">${esc(data.message)}</div>` : ''}
       <div class="re-card-stats">

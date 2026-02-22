@@ -91,8 +91,8 @@ async function doTip(targetUserId, postId, tipType, overlay) {
 
     if (errorEl) errorEl.style.display = "none";
     if (successEl) {
-      let msg = `打赏成功！金额: ${result.amount}`;
-      if (result.fee_amount > 0) msg += `，手续费: ${result.fee_amount}`;
+      let msg = `打赏成功！对方收到 ${result.amount} 积分`;
+      if (result.fee_amount > 0) msg += `，手续费 ${result.fee_amount}（共扣 ${result.total_deduct}）`;
       successEl.textContent = msg;
       successEl.style.display = "block";
     }

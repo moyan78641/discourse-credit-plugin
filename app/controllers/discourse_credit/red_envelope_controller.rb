@@ -15,6 +15,8 @@ module ::DiscourseCredit
       envelope_type = params[:type] == "random" ? "random" : "fixed"
       message = params[:message].to_s[0..49]
       require_reply = params[:require_reply] == "true" || params[:require_reply] == true
+      require_like = params[:require_like] == "true" || params[:require_like] == true
+      require_keyword = params[:require_keyword].to_s.strip[0..99]
 
       max_amount = config_get_i("red_envelope_max_amount")
       return render json: { error: "金额无效" }, status: 400 if amount <= 0
@@ -52,6 +54,8 @@ module ::DiscourseCredit
           message: message,
           status: "active",
           require_reply: require_reply,
+          require_like: require_like,
+          require_keyword: require_keyword,
           expires_at: Time.current + expire_hours.hours,
         )
 
@@ -91,11 +95,34 @@ module ::DiscourseCredit
         raise "您已领取过该红包" if envelope.claimed_by?(current_user.id)
         raise "红包已被领完" if envelope.exhausted?
 
-        # 检查是否需要回复
-        if envelope.require_reply && envelope.topic_id.present?
-          has_reply = Post.where(topic_id: envelope.topic_id, user_id: current_user.id)
-                         .where("post_number > 1").exists?
-          raise "需要先回复该话题才能领取红包" unless has_reply
+        # 检查领取条件
+        if envelope.topic_id.present?
+          # 需要回复
+          if envelope.require_reply
+            has_reply = Post.where(topic_id: envelope.topic_id, user_id: current_user.id)
+                           .where("post_number > 1").exists?
+            raise "需要先回复该话题才能领取红包" unless has_reply
+          end
+
+          # 需要点赞
+          if envelope.require_like
+            # 找到红包所在的帖子（第一楼）
+            first_post = Post.find_by(topic_id: envelope.topic_id, post_number: 1)
+            if first_post
+              has_like = PostAction.where(post_id: first_post.id, user_id: current_user.id, post_action_type_id: PostActionType.types[:like]).exists?
+              raise "需要先点赞该话题才能领取红包" unless has_like
+            end
+          end
+
+          # 需要回复指定内容
+          if envelope.require_keyword.present?
+            keyword = envelope.require_keyword.gsub("%", "\\%").gsub("_", "\\_")
+            has_keyword_reply = Post.where(topic_id: envelope.topic_id, user_id: current_user.id)
+                                    .where("post_number > 1")
+                                    .where("raw LIKE ?", "%#{keyword}%")
+                                    .exists?
+            raise "需要回复包含「#{envelope.require_keyword}」的内容才能领取红包" unless has_keyword_reply
+          end
         end
 
         if envelope.envelope_type == "fixed"
@@ -172,6 +199,8 @@ module ::DiscourseCredit
         message: envelope.message,
         status: envelope.status,
         require_reply: envelope.require_reply,
+        require_like: envelope.require_like,
+        require_keyword: envelope.require_keyword,
         expires_at: envelope.expires_at,
         claims: claims,
         has_claimed: has_claimed,
