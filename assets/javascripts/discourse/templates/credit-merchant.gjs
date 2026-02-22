@@ -15,6 +15,7 @@ class CreditMerchantPage extends Component {
   @tracked showCreate = false;
   @tracked newAppName = "";
   @tracked newRedirectUri = "";
+  @tracked newReturnUrl = "";
   @tracked newNotifyUrl = "";
   @tracked newDescription = "";
   @tracked creating = false;
@@ -50,6 +51,7 @@ class CreditMerchantPage extends Component {
   @action toggleCreate() { this.showCreate = !this.showCreate; this.createdApp = null; this.error = null; }
   @action updateNewAppName(e) { this.newAppName = e.target.value; }
   @action updateNewRedirectUri(e) { this.newRedirectUri = e.target.value; }
+  @action updateNewReturnUrl(e) { this.newReturnUrl = e.target.value; }
   @action updateNewNotifyUrl(e) { this.newNotifyUrl = e.target.value; }
   @action updateNewDescription(e) { this.newDescription = e.target.value; }
 
@@ -63,6 +65,7 @@ class CreditMerchantPage extends Component {
         data: {
           name: this.newAppName,
           redirect_uri: this.newRedirectUri,
+          return_url: this.newReturnUrl,
           notify_url: this.newNotifyUrl,
           description: this.newDescription,
         },
@@ -71,6 +74,7 @@ class CreditMerchantPage extends Component {
       this.showCreate = false;
       this.newAppName = "";
       this.newRedirectUri = "";
+      this.newReturnUrl = "";
       this.newNotifyUrl = "";
       this.newDescription = "";
       await this.loadApps();
@@ -101,6 +105,7 @@ class CreditMerchantPage extends Component {
     this.editFields = {
       app_name: app.app_name,
       redirect_uri: app.redirect_uri || "",
+      return_url: app.return_url || "",
       notify_url: app.notify_url || "",
       description: app.description || "",
     };
@@ -121,6 +126,7 @@ class CreditMerchantPage extends Component {
         data: {
           name: this.editFields.app_name,
           redirect_uri: this.editFields.redirect_uri,
+          return_url: this.editFields.return_url,
           notify_url: this.editFields.notify_url,
           description: this.editFields.description,
         },
@@ -250,7 +256,8 @@ class CreditMerchantPage extends Component {
       {{#if this.showCreate}}
         <div class="credit-form-card">
           <div class="form-row"><label>应用名称</label><input type="text" value={{this.newAppName}} placeholder="您的应用名称" {{on "input" this.updateNewAppName}} /></div>
-          <div class="form-row"><label>应用主页 (回调地址)</label><input type="text" value={{this.newRedirectUri}} placeholder="https://your-domain.com" {{on "input" this.updateNewRedirectUri}} /></div>
+          <div class="form-row"><label>应用主页</label><input type="text" value={{this.newRedirectUri}} placeholder="https://your-domain.com" {{on "input" this.updateNewRedirectUri}} /></div>
+          <div class="form-row"><label>回调地址</label><input type="text" value={{this.newReturnUrl}} placeholder="https://your-domain.com/console/log" {{on "input" this.updateNewReturnUrl}} /></div>
           <div class="form-row"><label>通知地址 (异步回调)</label><input type="text" value={{this.newNotifyUrl}} placeholder="https://your-domain.com/api/notify" {{on "input" this.updateNewNotifyUrl}} /></div>
           <div class="form-row"><label>描述</label><textarea maxlength="200" placeholder="应用描述（选填）" {{on "input" this.updateNewDescription}}>{{this.newDescription}}</textarea></div>
           <button class="btn btn-primary" type="button" disabled={{this.creating}} {{on "click" this.createApp}}>
@@ -279,6 +286,7 @@ class CreditMerchantPage extends Component {
                     <div class="credit-form-card compact">
                       <div class="form-row"><label>应用名称</label><input type="text" value={{this.editFields.app_name}} {{on "input" (fn this.updateEditField "app_name")}} /></div>
                       <div class="form-row"><label>应用主页</label><input type="text" value={{this.editFields.redirect_uri}} placeholder="https://..." {{on "input" (fn this.updateEditField "redirect_uri")}} /></div>
+                      <div class="form-row"><label>回调地址</label><input type="text" value={{this.editFields.return_url}} placeholder="https://..." {{on "input" (fn this.updateEditField "return_url")}} /></div>
                       <div class="form-row"><label>通知地址</label><input type="text" value={{this.editFields.notify_url}} placeholder="https://..." {{on "input" (fn this.updateEditField "notify_url")}} /></div>
                       <div class="form-row"><label>描述</label><input type="text" value={{this.editFields.description}} {{on "input" (fn this.updateEditField "description")}} /></div>
                       <div class="form-actions">
@@ -291,10 +299,11 @@ class CreditMerchantPage extends Component {
                       <div class="info-row"><span class="info-label">商户ID (pid)</span><code class="info-value">{{app.client_id}}</code><button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText app.client_id)}}>复制</button></div>
                       <div class="info-row"><span class="info-label">商户密钥 (key)</span><code class="info-value secret">{{app.client_secret}}</code><button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.copyText app.client_secret)}}>复制</button></div>
                       {{#if app.redirect_uri}}<div class="info-row"><span class="info-label">应用主页</span><span class="info-value">{{app.redirect_uri}}</span></div>{{/if}}
+                      {{#if app.return_url}}<div class="info-row"><span class="info-label">回调地址</span><span class="info-value">{{app.return_url}}</span></div>{{/if}}
                       {{#if app.notify_url}}<div class="info-row"><span class="info-label">通知地址</span><span class="info-value">{{app.notify_url}}</span></div>{{/if}}
                     </div>
                     <div class="app-actions">
-                      <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.startEditApp app)}}>{{icon "edit"}} 编辑</button>
+                      <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.startEditApp app)}}>{{icon "pen-to-square"}} 编辑</button>
                       <button class="btn btn-small btn-default" type="button" {{on "click" (fn this.toggleAppStatus app)}}>{{if app.is_active "停用" "启用"}}</button>
                       <button class="btn btn-small btn-danger" type="button" {{on "click" (fn this.resetSecret app.id)}}>{{icon "key"}} 重置密钥</button>
                     </div>

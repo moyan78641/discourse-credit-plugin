@@ -76,7 +76,7 @@ class CreditTransferPage extends Component {
 
   <template>
     <div class="credit-transfer-page">
-      <h2>{{icon "exchange-alt"}} 转账</h2>
+      <h2>{{icon "right-left"}} 转账</h2>
       <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       {{#if this.error}}<div class="credit-error">{{this.error}}</div>{{/if}}

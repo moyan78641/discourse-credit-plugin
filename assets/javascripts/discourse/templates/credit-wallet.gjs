@@ -154,14 +154,14 @@ class CreditWalletPage extends Component {
               <span>当前分数: {{this.wallet.current_leaderboard_score}}</span>
             </div>
             <div class="wallet-actions">
-              <a href="/credit/transfer" class="btn btn-primary">{{icon "exchange-alt"}} 转账</a>
+              <a href="/credit/transfer" class="btn btn-primary">{{icon "right-left"}} 转账</a>
               <a href="/credit/redenvelope" class="btn btn-default">{{icon "gift"}} 红包</a>
               <a href="/credit/dashboard" class="btn btn-default">{{icon "chart-line"}} 统计</a>
               <a href="/credit/merchant" class="btn btn-default">{{icon "store"}} 商户</a>
               <a href="/credit/disputes" class="btn btn-default">{{icon "gavel"}} 争议</a>
               <button class="btn btn-default" type="button" {{on "click" this.openPayKeyModal}}>{{icon "key"}} 修改密码</button>
               {{#if this.wallet.is_admin}}
-                <a href="/credit/admin" class="btn btn-danger">{{icon "cogs"}} 管理后台</a>
+                <a href="/credit/admin" class="btn btn-danger">{{icon "gears"}} 管理后台</a>
               {{/if}}
             </div>
           </div>

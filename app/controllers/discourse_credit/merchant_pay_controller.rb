@@ -59,8 +59,8 @@ module ::DiscourseCredit
 
       # Store notify/return URLs in PluginStore (no Redis dependency)
       PluginStore.set("credit_notify", "order_#{order.id}", {
-        "notify_url" => notify_url.presence,
-        "return_url" => return_url.presence,
+        "notify_url" => notify_url.presence || app.notify_url.presence,
+        "return_url" => return_url.presence || app.return_url.presence,
       })
 
       # Redirect to cashier page

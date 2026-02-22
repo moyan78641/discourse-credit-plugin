@@ -19,6 +19,7 @@ module ::DiscourseCredit
         client_id: Crypto.generate_random_string(32),
         client_secret: Crypto.generate_random_string(48),
         redirect_uri: params[:redirect_uri] || "",
+        return_url: params[:return_url] || "",
         notify_url: params[:notify_url] || "",
         description: params[:description] || "",
         is_active: true,
@@ -36,6 +37,7 @@ module ::DiscourseCredit
       new_name = (params[:name] || params[:app_name]).to_s.strip
       updates[:app_name] = new_name if new_name.present?
       updates[:redirect_uri] = params[:redirect_uri] if params.key?(:redirect_uri)
+      updates[:return_url] = params[:return_url] if params.key?(:return_url)
       updates[:notify_url] = params[:notify_url] if params.key?(:notify_url)
       updates[:description] = params[:description] if params.key?(:description)
       updates[:is_active] = params[:is_active] if params.key?(:is_active)

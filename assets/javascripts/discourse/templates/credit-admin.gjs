@@ -176,14 +176,14 @@ class CreditAdminPage extends Component {
 
   <template>
     <div class="credit-admin-page">
-      <h2>{{icon "cogs"}} 积分管理后台</h2>
+      <h2>{{icon "gears"}} 积分管理后台</h2>
       <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       <div class="credit-tabs">
         <button class="btn {{if this.isStatsTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "stats")}}>{{icon "chart-line"}} 统计</button>
         <button class="btn {{if this.isFeesTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "fees")}}>{{icon "wallet"}} 费率等级</button>
-        <button class="btn {{if this.isConfigsTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "configs")}}>{{icon "cogs"}} 系统配置</button>
-        <button class="btn {{if this.isUsersTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "users")}}>{{icon "search"}} 用户</button>
+        <button class="btn {{if this.isConfigsTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "configs")}}>{{icon "gears"}} 系统配置</button>
+        <button class="btn {{if this.isUsersTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "users")}}>{{icon "magnifying-glass"}} 用户</button>
       </div>
 
       {{#if this.error}}<div class="credit-error">{{this.error}}</div>{{/if}}
@@ -206,7 +206,7 @@ class CreditAdminPage extends Component {
                 <span class="stat-value">{{this.stats.total_balance}}</span>
               </div>
               <div class="admin-stat-card">
-                <div class="stat-icon">{{icon "exchange-alt"}}</div>
+                <div class="stat-icon">{{icon "right-left"}}</div>
                 <span class="stat-label">今日订单</span>
                 <span class="stat-value">{{this.stats.today_orders}}</span>
               </div>
@@ -246,7 +246,7 @@ class CreditAdminPage extends Component {
                     <span>{{if cfg.max_score cfg.max_score "无上限"}}</span>
                     <span>{{cfg.fee_rate}}</span>
                     <span>{{if cfg.daily_limit cfg.daily_limit "不限"}}</span>
-                    <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.startEditPayConfig cfg)}}>{{icon "edit"}} 编辑</button>
+                    <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.startEditPayConfig cfg)}}>{{icon "pen-to-square"}} 编辑</button>
                   </div>
                 {{/if}}
               {{/each}}
@@ -288,7 +288,7 @@ class CreditAdminPage extends Component {
                   <button class="btn btn-small btn-primary" type="button" {{on "click" this.saveConfig}}>保存</button>
                 {{else}}
                   <span class="config-value">{{cfg.value}}</span>
-                  <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.startEditConfig cfg.key cfg.value)}}>{{icon "edit"}} 编辑</button>
+                  <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.startEditConfig cfg.key cfg.value)}}>{{icon "pen-to-square"}} 编辑</button>
                 {{/if}}
               </div>
             {{/each}}
@@ -298,7 +298,7 @@ class CreditAdminPage extends Component {
         {{#if this.isUsersTab}}
           <div class="admin-user-search">
             <input type="text" placeholder="搜索用户名" value={{this.userSearch}} {{on "input" this.updateUserSearch}} />
-            <button class="btn btn-small btn-default" type="button" {{on "click" this.searchUsers}}>{{icon "search"}} 搜索</button>
+            <button class="btn btn-small btn-default" type="button" {{on "click" this.searchUsers}}>{{icon "magnifying-glass"}} 搜索</button>
           </div>
           <div class="admin-users-list">
             {{#each this.users as |u|}}

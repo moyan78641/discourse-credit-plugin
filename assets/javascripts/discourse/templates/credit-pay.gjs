@@ -62,7 +62,7 @@ class CreditPayPage extends Component {
 
   <template>
     <div class="credit-pay-page">
-      <h2>{{icon "shopping-cart"}} 收银台</h2>
+      <h2>{{icon "cart-shopping"}} 收银台</h2>
 
       {{#if this.loading}}
         <p class="loading-text">加载中...</p>
