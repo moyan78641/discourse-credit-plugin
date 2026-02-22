@@ -33,7 +33,8 @@ module ::DiscourseCredit
       return render json: { error: "应用不存在" }, status: 404 unless app
 
       updates = {}
-      updates[:app_name] = params[:app_name] if params[:app_name].present?
+      new_name = (params[:name] || params[:app_name]).to_s.strip
+      updates[:app_name] = new_name if new_name.present?
       updates[:redirect_uri] = params[:redirect_uri] if params.key?(:redirect_uri)
       updates[:notify_url] = params[:notify_url] if params.key?(:notify_url)
       updates[:description] = params[:description] if params.key?(:description)
