@@ -20,23 +20,33 @@ class CreditProductDetailPage extends Component {
   }
 
   get productId() {
+    // 从 URL 获取（最可靠）
+    const match = window.location.pathname.match(/\/credit\/product\/(\d+)/);
+    if (match) return match[1];
+    // fallback: 从 model 获取
     const m = this.args.model;
     if (m?.id) return m.id;
     if (m?.params?.id) return m.params.id;
-    const match = window.location.pathname.match(/\/credit\/product\/(\d+)/);
-    return match ? match[1] : null;
+    return null;
   }
 
   get stockDisplay() {
     const p = this.product;
     if (!p) return "";
     if (p.stock === -1) return "无限";
+    if (p.stock === null || p.stock === undefined) return "0";
     return String(p.stock);
   }
 
   async loadProduct() {
+    const pid = this.productId;
+    if (!pid) {
+      this.error = "商品ID无效";
+      this.loading = false;
+      return;
+    }
     try {
-      const data = await ajax(`/credit/product/${this.productId}.json`);
+      const data = await ajax(`/credit/product/${pid}.json`);
       this.product = data;
     } catch (e) {
       this.error = e.jqXHR?.responseJSON?.error || "加载失败";
