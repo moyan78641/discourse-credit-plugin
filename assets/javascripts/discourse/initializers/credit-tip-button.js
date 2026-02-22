@@ -28,14 +28,6 @@ export default apiInitializer("1.0", (api) => {
     showTipDialog(api, userId, postId, tipType);
   });
 
-  // 个人主页打赏按钮
-  api.addUserProfileCustomAction("credit-tip-profile", {
-    label: "打赏",
-    icon: "hand-holding-heart",
-    action(user) {
-      showTipDialog(api, user.id, null, "profile");
-    },
-  });
 });
 
 function showTipDialog(api, targetUserId, postId, tipType) {
