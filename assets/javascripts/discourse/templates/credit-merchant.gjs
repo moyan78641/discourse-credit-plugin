@@ -3,12 +3,10 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import { fn, helper } from "@ember/helper";
+import { fn } from "@ember/helper";
+import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
-
-const eq = helper(function eq([a, b]) { return a === b; });
-const stockLabel = helper(function stockLabel([stock]) { return stock === -1 ? "无限" : String(stock); });
 
 class CreditMerchantPage extends Component {
   @tracked apps = [];
@@ -202,7 +200,7 @@ class CreditMerchantPage extends Component {
                         <div class="product-row">
                           <span class="product-name">{{p.name}}</span>
                           <span class="product-price">{{p.price}} 积分</span>
-                          <span class="product-stock">库存: {{stockLabel p.stock}}</span>
+                          <span class="product-stock">库存: {{if (eq p.stock -1) "无限" p.stock}}</span>
                           <span class="product-sold">已售: {{p.sold_count}}</span>
                           <button class="btn btn-flat btn-small" type="button" {{on "click" (fn this.toggleProductStatus p.id p.active)}}>
                             {{if p.active "下架" "上架"}}

@@ -3,11 +3,10 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import { fn, helper } from "@ember/helper";
+import { fn } from "@ember/helper";
+import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
-
-const eq = helper(function eq([a, b]) { return a === b; });
 
 class CreditAdminPage extends Component {
   @tracked tab = "stats";

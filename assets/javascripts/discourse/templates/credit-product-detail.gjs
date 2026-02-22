@@ -3,11 +3,9 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { on } from "@ember/modifier";
-import { helper } from "@ember/helper";
+import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
-
-const stockLabel = helper(function stockLabel([stock]) { return stock === -1 ? "无限" : String(stock); });
 
 class CreditProductDetailPage extends Component {
   @tracked product = null;
@@ -78,7 +76,7 @@ class CreditProductDetailPage extends Component {
           {{/if}}
           <div class="product-info-grid">
             <div class="info-item"><span class="info-label">价格</span><span class="info-value price">{{this.product.price}} 积分</span></div>
-            <div class="info-item"><span class="info-label">库存</span><span class="info-value">{{stockLabel this.product.stock}}</span></div>
+            <div class="info-item"><span class="info-label">库存</span><span class="info-value">{{if (eq this.product.stock -1) "无限" this.product.stock}}</span></div>
             <div class="info-item"><span class="info-label">已售</span><span class="info-value">{{this.product.sold_count}}</span></div>
             {{#if this.product.limit_per_user}}
               <div class="info-item"><span class="info-label">限购</span><span class="info-value">{{this.product.limit_per_user}} 件</span></div>
