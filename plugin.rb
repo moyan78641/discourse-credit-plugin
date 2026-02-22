@@ -48,12 +48,14 @@ after_initialize do
     refund_expired_red_envelopes
   ].each { |j| require File.join(plugin_root, "app", "jobs", "scheduled", j) }
 
-  # Ember shell 路由
+  # Ember shell 路由 (仅 HTML，不拦截 .json API 请求)
   Discourse::Application.routes.prepend do
-    get "/credit" => "list#latest"
-    get "/credit/merchant" => "list#latest"
-    get "/credit/product/:id" => "list#latest"
-    get "/credit/admin" => "list#latest"
+    constraints(->(req) { !req.path.end_with?(".json") }) do
+      get "/credit" => "list#latest"
+      get "/credit/merchant" => "list#latest"
+      get "/credit/product/:id" => "list#latest"
+      get "/credit/admin" => "list#latest"
+    end
   end
 
   # Markdown 扩展：渲染红包卡片 [red-envelope id=xxx]
