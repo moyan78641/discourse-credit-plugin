@@ -175,15 +175,61 @@
 // ========================================
 .credit-merchant-page { max-width: 900px; margin: 0 auto; padding: 20px; }
 
-.credit-app-card {
-  background: var(--primary-very-low); border-radius: 8px; padding: 16px; margin-bottom: 12px;
-  .app-header { display: flex; justify-content: space-between; cursor: pointer; margin-bottom: 8px; }
-  .app-name { font-weight: 600; font-size: 1.05em; }
-  .app-status { font-size: 0.8em; padding: 2px 8px; border-radius: 10px; &.active { background: var(--success-low); color: var(--success); } &.inactive { background: var(--danger-low); color: var(--danger); } }
-  .app-info { margin-top: 8px; }
-  .app-field { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.9em; }
-  .field-label { font-weight: 500; min-width: 70px; }
-  code { background: var(--primary-low); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; word-break: break-all; }
+// Credential notice (shown after create or reset)
+.merchant-credential-notice {
+  background: var(--success-low); border: 1px solid var(--success); border-radius: 8px; padding: 20px; margin-bottom: 16px;
+  h3 { margin: 0 0 12px; color: var(--success); font-size: 1em; }
+  .credential-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    .credential-label { font-weight: 600; min-width: 130px; font-size: 0.9em; }
+    .credential-value { font-family: monospace; background: var(--secondary); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; word-break: break-all; flex: 1; }
+  }
+  .credential-tip { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--success); p { margin: 0 0 8px; font-weight: 500; } }
+}
+
+.credit-apps-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+
+.app-card {
+  background: var(--primary-very-low); border-radius: 8px; overflow: hidden;
+  border-left: 4px solid var(--tertiary);
+  &.inactive { border-left-color: var(--primary-low-mid); opacity: 0.8; }
+
+  .app-header {
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; padding: 14px 16px;
+    &:hover { background: var(--primary-low); }
+  }
+  .app-header-left { flex: 1; }
+  .app-name { font-weight: 600; font-size: 1.05em; display: block; }
+  .app-desc { font-size: 0.8em; color: var(--primary-medium); }
+  .app-status-badge {
+    font-size: 0.8em; padding: 2px 10px; border-radius: 10px; font-weight: 500;
+    &.active { background: var(--success-low); color: var(--success); }
+    &.inactive { background: var(--danger-low); color: var(--danger); }
+  }
+
+  .app-detail { padding: 0 16px 16px; }
+
+  .app-info-grid {
+    margin-bottom: 12px;
+    .info-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid var(--primary-low);
+      &:last-child { border-bottom: none; }
+    }
+    .info-label { font-weight: 500; min-width: 120px; font-size: 0.9em; color: var(--primary-medium); }
+    .info-value { font-family: monospace; font-size: 0.85em; word-break: break-all; flex: 1;
+      &.secret { color: var(--danger); }
+    }
+  }
+
+  .app-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+  .form-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+  .app-products-section {
+    border-top: 1px solid var(--primary-low); padding-top: 12px;
+    .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; h4 { margin: 0; } }
+  }
 }
 
 .product-row {
