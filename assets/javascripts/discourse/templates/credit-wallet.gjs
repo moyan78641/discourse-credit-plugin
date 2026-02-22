@@ -151,6 +151,7 @@ class CreditWalletPage extends Component {
             </div>
             <div class="wallet-actions">
               <a href="/credit/merchant" class="btn btn-default">{{icon "store"}} 商户</a>
+              <a href="/credit/my-orders" class="btn btn-default">{{icon "cart-shopping"}} 我的购买</a>
               <button class="btn btn-default" type="button" {{on "click" this.openPayKeyModal}}>{{icon "key"}} 修改密码</button>
               {{#if this.wallet.is_admin}}<a href="/credit/admin" class="btn btn-danger">{{icon "gears"}} 管理后台</a>{{/if}}
             </div>

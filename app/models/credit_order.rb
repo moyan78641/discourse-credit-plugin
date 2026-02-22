@@ -6,11 +6,15 @@ class CreditOrder < ActiveRecord::Base
   # Order types (v2: 去掉 transfer/online/distribute, 新增 tip/product)
   TYPES = %w[
     receive payment community
-    tip product
+    tip product product_refund dispute_compensation
     red_envelope_send red_envelope_receive red_envelope_refund
   ].freeze
 
-  STATUSES = %w[success failed pending expired].freeze
+  STATUSES = %w[success failed pending expired refunded].freeze
+
+  DELIVERY_STATUSES = %w[pending_delivery processing delivered refunded].freeze
+
+  has_one :dispute, class_name: "CreditDispute", foreign_key: :order_id
 
   validates :order_name, presence: true
   validates :amount, presence: true, numericality: { greater_than: 0 }

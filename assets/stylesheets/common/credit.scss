@@ -214,11 +214,23 @@
   .card-key-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 6px 8px; border-bottom: 1px solid var(--primary-low);
-    font-size: 0.85em;
+    font-size: 0.85em; gap: 6px;
     &.sold { opacity: 0.5; }
     .card-key-value { font-family: monospace; word-break: break-all; flex: 1; }
     .card-key-status { font-weight: 500; margin-left: 8px; }
+    .card-key-edit-input { flex: 1; padding: 4px 8px; border: 1px solid var(--primary-low-mid); border-radius: 4px; font-family: monospace; }
   }
+}
+
+// Seller order rows
+.seller-order-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 12px; border-bottom: 1px solid var(--primary-low);
+  .order-info { flex: 1; min-width: 150px; }
+  .order-name { display: block; font-weight: 500; }
+  .order-meta { font-size: 0.8em; color: var(--primary-medium); display: block; }
+  .order-amount { font-weight: 600; font-size: 1.05em; color: var(--tertiary); white-space: nowrap; }
+  .order-delivery-status { min-width: 60px; text-align: center; }
 }
 
 // ========================================

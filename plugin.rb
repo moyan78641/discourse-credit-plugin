@@ -34,6 +34,7 @@ after_initialize do
     credit_red_envelope_claim
     credit_product
     credit_card_key
+    credit_dispute
     credit_system_config
     credit_pay_config
   ].each { |m| require File.join(plugin_root, "app", "models", m) }
@@ -46,6 +47,7 @@ after_initialize do
     sync_credit_scores
     expire_credit_orders
     refund_expired_red_envelopes
+    resolve_expired_disputes
   ].each { |j| require File.join(plugin_root, "app", "jobs", "scheduled", j) }
 
   # Ember shell 路由 (仅 HTML，不拦截 .json API 请求)
@@ -54,6 +56,7 @@ after_initialize do
       get "/credit" => "list#latest"
       get "/credit/merchant" => "list#latest"
       get "/credit/product/:id" => "list#latest"
+      get "/credit/my-orders" => "list#latest"
       get "/credit/admin" => "list#latest"
     end
   end

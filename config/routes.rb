@@ -26,10 +26,19 @@ DiscourseCredit::Engine.routes.draw do
   delete "/merchant/products/:id"          => "product#destroy"
   post   "/merchant/products/:id/card-keys" => "product#add_card_keys"
   get    "/merchant/products/:id/card-keys" => "product#card_keys"
+  put    "/merchant/card-keys/:id"         => "product#update_card_key"
+  delete "/merchant/card-keys/:id"         => "product#delete_card_key"
+  get    "/merchant/orders"                => "product#seller_orders"
+  put    "/merchant/orders/:id/delivery"   => "product#update_delivery"
+  put    "/merchant/dispute/:id/resolve"   => "product#resolve_dispute"
 
   # 商品公开页
   get  "/product/:id"     => "product#show"
   post "/product/:id/buy" => "product#buy"
+
+  # 买家订单 & 争议
+  get  "/my-orders"        => "product#buyer_orders"
+  post "/product/dispute"  => "product#create_dispute"
 
   # 管理后台
   get  "/admin/configs"       => "admin#configs"
