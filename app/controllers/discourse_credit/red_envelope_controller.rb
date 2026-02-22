@@ -96,32 +96,49 @@ module ::DiscourseCredit
         raise "红包已被领完" if envelope.exhausted?
 
         # 检查领取条件
-        if envelope.topic_id.present?
-          # 需要回复
-          if envelope.require_reply
-            has_reply = Post.where(topic_id: envelope.topic_id, user_id: current_user.id)
-                           .where("post_number > 1").exists?
-            raise "需要先回复该话题才能领取红包" unless has_reply
-          end
-
-          # 需要点赞
-          if envelope.require_like
-            # 找到红包所在的帖子（第一楼）
-            first_post = Post.find_by(topic_id: envelope.topic_id, post_number: 1)
-            if first_post
-              has_like = PostAction.where(post_id: first_post.id, user_id: current_user.id, post_action_type_id: PostActionType.types[:like]).exists?
-              raise "需要先点赞该话题才能领取红包" unless has_like
+        has_conditions = envelope.require_reply || envelope.require_like || envelope.require_keyword.present?
+        if has_conditions
+          # 如果 topic_id 为空，尝试从帖子内容反查
+          topic_id = envelope.topic_id
+          unless topic_id.present?
+            # 搜索包含 [credit-red-envelope id=xxx] 的帖子
+            post_with_envelope = Post.where("raw LIKE ?", "%[credit-red-envelope id=#{envelope.id}]%").first
+            if post_with_envelope
+              topic_id = post_with_envelope.topic_id
+              # 顺便补上 topic_id
+              envelope.update_columns(topic_id: topic_id, post_id: post_with_envelope.id)
             end
           end
 
-          # 需要回复指定内容
-          if envelope.require_keyword.present?
-            keyword = envelope.require_keyword.gsub("%", "\\%").gsub("_", "\\_")
-            has_keyword_reply = Post.where(topic_id: envelope.topic_id, user_id: current_user.id)
-                                    .where("post_number > 1")
-                                    .where("raw LIKE ?", "%#{keyword}%")
-                                    .exists?
-            raise "需要回复包含「#{envelope.require_keyword}」的内容才能领取红包" unless has_keyword_reply
+          if topic_id.present?
+            # 需要回复
+            if envelope.require_reply
+              has_reply = Post.where(topic_id: topic_id, user_id: current_user.id)
+                             .where("post_number > 1").exists?
+              raise "需要先回复该话题才能领取红包" unless has_reply
+            end
+
+            # 需要点赞
+            if envelope.require_like
+              first_post = Post.find_by(topic_id: topic_id, post_number: 1)
+              if first_post
+                has_like = PostAction.where(post_id: first_post.id, user_id: current_user.id, post_action_type_id: PostActionType.types[:like]).exists?
+                raise "需要先点赞该话题才能领取红包" unless has_like
+              end
+            end
+
+            # 需要回复指定内容
+            if envelope.require_keyword.present?
+              keyword = envelope.require_keyword.gsub("%", "\\%").gsub("_", "\\_")
+              has_keyword_reply = Post.where(topic_id: topic_id, user_id: current_user.id)
+                                      .where("post_number > 1")
+                                      .where("raw LIKE ?", "%#{keyword}%")
+                                      .exists?
+              raise "需要回复包含「#{envelope.require_keyword}」的内容才能领取红包" unless has_keyword_reply
+            end
+          else
+            # 找不到话题但有条件，拒绝领取（安全起见）
+            raise "红包条件验证失败：无法确定红包所在话题"
           end
         end
 
