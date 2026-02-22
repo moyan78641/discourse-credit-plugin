@@ -11,71 +11,165 @@ export default apiInitializer("1.0", (api) => {
     },
   });
 
+  // post-stream 刷新时重新处理红包
+  api.onAppEvent("post-stream:refresh", () => {
+    processRedEnvelopes();
+  });
+
   // 渲染帖子中的红包卡片
-  // 直接扫描 cooked HTML 中的 [credit-red-envelope id=xxx] 文本并替换
+  // 使用 afterAdopt: true 确保在 Ember 完成 DOM 渲染后执行
   api.decorateCookedElement(
     (elem) => {
-      // 方法1: 查找已有的 wrap div (如果 markdown-it 成功生成了)
-      elem.querySelectorAll(".credit-red-envelope-wrap, [class*='credit-red-envelope-']").forEach((el) => {
-        const envelopeId = el.dataset?.envelopeId || el.className.match(/credit-red-envelope-(\d+)/)?.[1];
-        if (!envelopeId || el.dataset.rendered) return;
-        el.dataset.rendered = "1";
-        loadAndRenderEnvelope(el, envelopeId);
-      });
-
-      // 方法2: 扫描文本节点，找 [credit-red-envelope id=xxx]
-      const walker = document.createTreeWalker(elem, NodeFilter.SHOW_TEXT, null, false);
-      const textNodes = [];
-      let node;
-      while ((node = walker.nextNode())) {
-        if (/\[credit-red-envelope\s+id=\d+\]/.test(node.textContent)) {
-          textNodes.push(node);
-        }
-      }
-
-      textNodes.forEach((textNode) => {
-        const text = textNode.textContent;
-        const regex = /\[credit-red-envelope\s+id=(\d+)\]/g;
-        let match;
-        const parts = [];
-        let lastIndex = 0;
-
-        while ((match = regex.exec(text)) !== null) {
-          // 前面的普通文本
-          if (match.index > lastIndex) {
-            parts.push(document.createTextNode(text.slice(lastIndex, match.index)));
-          }
-          // 红包占位 div
-          const div = document.createElement("div");
-          div.className = "credit-re-placeholder";
-          div.dataset.envelopeId = match[1];
-          div.textContent = "加载红包中...";
-          parts.push(div);
-          lastIndex = regex.lastIndex;
-        }
-
-        if (parts.length === 0) return;
-
-        // 剩余文本
-        if (lastIndex < text.length) {
-          parts.push(document.createTextNode(text.slice(lastIndex)));
-        }
-
-        // 替换原文本节点
-        const parent = textNode.parentNode;
-        parts.forEach((p) => parent.insertBefore(p, textNode));
-        parent.removeChild(textNode);
-
-        // 加载红包数据
-        parent.querySelectorAll(".credit-re-placeholder").forEach((el) => {
-          const eid = el.dataset.envelopeId;
-          if (eid) loadAndRenderEnvelope(el, eid);
-        });
-      });
+      processRedEnvelopesInElement(elem);
     },
-    { id: "credit-red-envelope-card" }
+    { id: "credit-red-envelope-card", afterAdopt: true }
   );
+
+  // 话题/帖子创建后绑定红包到话题
+  // Discourse 在帖子创建后触发多种事件，我们监听几个常见的
+  api.onAppEvent("topic:created", (post) => {
+    if (post) bindEnvelopesToTopic(post);
+  });
+  api.onAppEvent("composer:created-post", (post) => {
+    if (post) bindEnvelopesToTopic(post);
+  });
+  api.onAppEvent("post:created", (post) => {
+    if (post) bindEnvelopesToTopic(post);
+  });
+
+  // 备用方案：用 MutationObserver 监听 post-stream 容器
+  // 当 Ember 重新渲染 cooked 内容时，重新处理红包
+  api.onPageChange(() => {
+    scheduleRedEnvelopeProcessing();
+  });
 });
+
+let _processingScheduled = false;
+function scheduleRedEnvelopeProcessing() {
+  if (_processingScheduled) return;
+  _processingScheduled = true;
+  // 等 Ember 渲染完成
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      _processingScheduled = false;
+      processRedEnvelopes();
+    }, 300);
+  });
+}
+
+function processRedEnvelopes() {
+  const container = document.querySelector(".post-stream") || document.querySelector(".topic-post");
+  if (!container) return;
+  const cookedElements = container.querySelectorAll(".cooked");
+  cookedElements.forEach((elem) => processRedEnvelopesInElement(elem));
+}
+
+function processRedEnvelopesInElement(elem) {
+  if (!elem) return;
+
+  // 方法1: 查找已有的 wrap div
+  elem.querySelectorAll(".credit-red-envelope-wrap, [class*='credit-red-envelope-']").forEach((el) => {
+    const envelopeId = el.dataset?.envelopeId || el.className.match(/credit-red-envelope-(\d+)/)?.[1];
+    if (!envelopeId || el.dataset.rendered) return;
+    el.dataset.rendered = "1";
+    loadAndRenderEnvelope(el, envelopeId);
+  });
+
+  // 方法2: 扫描文本节点，找 [credit-red-envelope id=xxx]
+  const walker = document.createTreeWalker(elem, NodeFilter.SHOW_TEXT, null, false);
+  const textNodes = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (/\[credit-red-envelope\s+id=\d+\]/.test(node.textContent)) {
+      textNodes.push(node);
+    }
+  }
+
+  textNodes.forEach((textNode) => {
+    const text = textNode.textContent;
+    const regex = /\[credit-red-envelope\s+id=(\d+)\]/g;
+    let match;
+    const parts = [];
+    let lastIndex = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const div = document.createElement("div");
+      div.className = "credit-re-placeholder";
+      div.dataset.envelopeId = match[1];
+      div.dataset.rendered = "1";
+      div.textContent = "🧧 加载红包中...";
+      parts.push(div);
+      lastIndex = regex.lastIndex;
+    }
+
+    if (parts.length === 0) return;
+
+    if (lastIndex < text.length) {
+      parts.push(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    const parent = textNode.parentNode;
+    parts.forEach((p) => parent.insertBefore(p, textNode));
+    parent.removeChild(textNode);
+
+    parent.querySelectorAll(".credit-re-placeholder").forEach((el) => {
+      const eid = el.dataset.envelopeId;
+      if (eid) loadAndRenderEnvelope(el, eid);
+    });
+  });
+
+  // 方法3: 检查是否在 <p> 或 <code> 等标签内，文本被 HTML 包裹
+  // 例如 <p>[credit-red-envelope id=4]</p>
+  elem.querySelectorAll("p, span, code").forEach((el) => {
+    if (el.dataset.reProcessed) return;
+    const match = el.textContent.match(/^\s*\[credit-red-envelope\s+id=(\d+)\]\s*$/);
+    if (match) {
+      el.dataset.reProcessed = "1";
+      const div = document.createElement("div");
+      div.className = "credit-re-placeholder";
+      div.dataset.envelopeId = match[1];
+      div.dataset.rendered = "1";
+      div.textContent = "🧧 加载红包中...";
+      el.replaceWith(div);
+      loadAndRenderEnvelope(div, match[1]);
+    }
+  });
+}
+
+async function bindEnvelopesToTopic(post) {
+  // 从帖子内容中提取红包 ID
+  let raw = post.raw || post.get?.("raw") || "";
+
+  // 如果 raw 为空，尝试从 composer 获取
+  if (!raw) {
+    const composer = document.querySelector(".d-editor-input");
+    if (composer) raw = composer.value || "";
+  }
+
+  const topicId = post.topic_id || post.get?.("topic_id");
+  const postId = post.id || post.get?.("id");
+  if (!topicId || !raw) return;
+
+  const regex = /\[credit-red-envelope\s+id=(\d+)\]/g;
+  let match;
+  while ((match = regex.exec(raw)) !== null) {
+    try {
+      await ajax("/credit/redenvelope/bind-post.json", {
+        type: "POST",
+        data: {
+          envelope_id: match[1],
+          topic_id: topicId,
+          post_id: postId,
+        },
+      });
+    } catch {
+      // ignore bind errors
+    }
+  }
+}
 
 function showRedEnvelopeModal(toolbarEvent) {
   document.getElementById("credit-re-overlay")?.remove();
@@ -213,7 +307,7 @@ function renderEnvelopeCard(el, data) {
   let html = `
     <div class="credit-re-card ${statusClass}">
       <div class="re-card-header">
-        <svg class="fa d-icon d-icon-gift svg-icon svg-string" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><use href="#gift"></use></svg>
+        <span class="re-card-icon">🧧</span>
         <span class="re-card-title">${esc(data.sender_username)} 的${typeLabel}</span>
         ${condBadges}
       </div>
