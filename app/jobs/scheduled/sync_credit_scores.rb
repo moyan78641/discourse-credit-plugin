@@ -2,8 +2,7 @@
 
 module Jobs
   class SyncCreditScores < ::Jobs::Scheduled
-    every 1.day
-    at("16:00") # UTC 16:00 = 北京时间 0:00
+    daily at: 16.hours # UTC 16:00 = 北京时间 0:00
     sidekiq_options queue: "low"
 
     def execute(args)
