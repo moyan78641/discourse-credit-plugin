@@ -20,22 +20,29 @@ module ::DiscourseCredit
       recipient_wallet = CreditWallet.find_by(user_id: recipient_user.id)
       return render json: { error: "收款人未开通钱包" }, status: 400 unless recipient_wallet
 
+      fee_rate = config_get_f("transfer_fee_rate")
+      fee = (amount * fee_rate).round(2)
+      actual_receive = amount - fee
+      total_deduct = amount
+
       ActiveRecord::Base.transaction do
         wallet.reload
-        raise "余额不足" if wallet.available_balance < amount
+        raise "余额不足" if wallet.available_balance < total_deduct
 
-        # Deduct payer
+        # Deduct payer (full amount including fee)
         CreditWallet.where(id: wallet.id).update_all(
-          "available_balance = available_balance - #{amount}, " \
-          "total_transfer = total_transfer + #{amount}, " \
-          "total_payment = total_payment + #{amount}",
+          "available_balance = available_balance - #{total_deduct}, " \
+          "total_transfer = total_transfer + #{total_deduct}, " \
+          "total_payment = total_payment + #{total_deduct}",
         )
 
-        # Add to recipient
+        # Add to recipient (amount minus fee)
         CreditWallet.where(id: recipient_wallet.id).update_all(
-          "available_balance = available_balance + #{amount}, " \
-          "total_receive = total_receive + #{amount}",
+          "available_balance = available_balance + #{actual_receive}, " \
+          "total_receive = total_receive + #{actual_receive}",
         )
+
+        fee_note = fee > 0 ? " (手续费: #{format('%.2f', fee)})" : ""
 
         # Payer order
         CreditOrder.create!(
@@ -45,7 +52,7 @@ module ::DiscourseCredit
           amount: amount,
           status: "success",
           order_type: "transfer",
-          remark: remark,
+          remark: "#{remark}#{fee_note}",
           trade_time: Time.current,
           expires_at: Time.current,
         )
@@ -55,7 +62,7 @@ module ::DiscourseCredit
           order_name: "收到 #{current_user.username} 的转账",
           payer_user_id: 0,
           payee_user_id: recipient_user.id,
-          amount: amount,
+          amount: actual_receive,
           status: "success",
           order_type: "receive",
           remark: remark,

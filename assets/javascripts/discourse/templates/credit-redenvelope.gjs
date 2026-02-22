@@ -18,6 +18,7 @@ class CreditRedEnvelopePage extends Component {
   @tracked error = null;
   @tracked success = null;
   @tracked submitting = false;
+  @tracked claimUrl = null;
   @tracked sentList = [];
   @tracked receivedList = [];
   @tracked listLoading = false;
@@ -26,11 +27,19 @@ class CreditRedEnvelopePage extends Component {
     this.tab = t;
     this.error = null;
     this.success = null;
+    this.claimUrl = null;
     if (t === "sent") this.loadSent();
     if (t === "received") this.loadReceived();
   }
 
   @action updateType(e) { this.envelopeType = e.target.value; }
+
+  @action copyUrl() {
+    if (this.claimUrl) {
+      navigator.clipboard.writeText(this.claimUrl);
+      this.success = "链接已复制到剪贴板";
+    }
+  }
   @action updateAmount(e) { this.amount = e.target.value; }
   @action updateCount(e) { this.count = e.target.value; }
   @action updateMessage(e) { this.message = e.target.value; }
@@ -55,7 +64,8 @@ class CreditRedEnvelopePage extends Component {
           pay_key: this.payKey,
         },
       });
-      this.success = `红包创建成功！ID: ${data.id}`;
+      this.success = `红包创建成功！`;
+      this.claimUrl = data.url;
       this.amount = "";
       this.count = "";
       this.payKey = "";
@@ -98,6 +108,16 @@ class CreditRedEnvelopePage extends Component {
 
       {{#if this.error}}<div class="credit-error">{{this.error}}</div>{{/if}}
       {{#if this.success}}<div class="credit-success">{{this.success}}</div>{{/if}}
+
+      {{#if this.claimUrl}}
+        <div class="credit-claim-url-card">
+          <p>分享以下链接给好友领取红包：</p>
+          <div class="claim-url-row">
+            <input type="text" readonly value={{this.claimUrl}} class="claim-url-input" />
+            <button class="btn btn-primary btn-small" type="button" {{on "click" this.copyUrl}}>复制链接</button>
+          </div>
+        </div>
+      {{/if}}
 
       {{#if this.isCreate}}
           <div class="credit-form-card">

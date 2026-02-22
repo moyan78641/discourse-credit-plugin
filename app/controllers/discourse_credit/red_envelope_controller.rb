@@ -20,6 +20,10 @@ module ::DiscourseCredit
       min_total = BigDecimal("0.01") * count
       return render json: { error: "红包金额太小" }, status: 400 if amount < min_total
 
+      fee_rate = config_get_f("red_envelope_fee_rate")
+      fee = (amount * fee_rate).round(2)
+      total_deduct = amount + fee
+
       expire_hours = config_get_i("red_envelope_expire_hours")
       expire_hours = 24 if expire_hours <= 0
 
@@ -27,11 +31,11 @@ module ::DiscourseCredit
 
       ActiveRecord::Base.transaction do
         wallet.reload
-        raise "余额不足" if wallet.available_balance < amount
+        raise "余额不足" if wallet.available_balance < total_deduct
 
         CreditWallet.where(id: wallet.id).update_all(
-          "available_balance = available_balance - #{amount}, " \
-          "total_payment = total_payment + #{amount}",
+          "available_balance = available_balance - #{total_deduct}, " \
+          "total_payment = total_payment + #{total_deduct}",
         )
 
         envelope = CreditRedEnvelope.create!(
@@ -50,16 +54,19 @@ module ::DiscourseCredit
           order_name: "发红包 (#{count}个)",
           payer_user_id: current_user.id,
           payee_user_id: 0,
-          amount: amount,
+          amount: total_deduct,
           status: "success",
           order_type: "red_envelope_send",
-          remark: message,
+          remark: "#{message}#{fee > 0 ? " (手续费: #{format('%.2f', fee)})" : ""}",
           trade_time: Time.current,
           expires_at: Time.current,
         )
       end
 
-      render json: { id: envelope.id, message: "红包创建成功" }
+      base_url = SiteSetting.credit_frontend_url.presence || Discourse.base_url
+      claim_url = "#{base_url}/credit/redenvelope/#{envelope.id}"
+
+      render json: { id: envelope.id, url: claim_url, message: "红包创建成功" }
     rescue => e
       render json: { error: e.message.include?("余额不足") ? "余额不足" : "创建红包失败" }, status: 400
     end

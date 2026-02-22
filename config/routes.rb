@@ -55,6 +55,8 @@ DiscourseCredit::Engine.routes.draw do
   put  "/admin/users/admin"   => "admin#set_admin"
   put  "/admin/users/balance" => "admin#set_balance"
   get  "/admin/stats"         => "admin#stats"
+  get  "/admin/pay-configs"   => "admin#pay_configs"
+  put  "/admin/pay-configs"   => "admin#update_pay_config"
 
   # Merchant payment API (易支付 compatible)
   get  "/pay/order"   => "merchant_pay#get_order"

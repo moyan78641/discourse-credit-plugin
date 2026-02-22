@@ -134,5 +134,40 @@ module ::DiscourseCredit
         today_orders: today_orders,
       }
     end
+
+    # GET /credit/admin/pay-configs.json
+    def pay_configs
+      configs = CreditPayConfig.order(:level)
+      render json: {
+        configs: configs.map { |c|
+          {
+            level: c.level,
+            level_name: CreditPayConfig.level_name(c.level),
+            min_score: c.min_score,
+            max_score: c.max_score,
+            daily_limit: c.daily_limit,
+            fee_rate: c.fee_rate&.to_f || 0,
+            score_rate: c.score_rate&.to_f || 0,
+          }
+        },
+      }
+    end
+
+    # PUT /credit/admin/pay-configs.json
+    def update_pay_config
+      level = params[:level].to_i
+      config = CreditPayConfig.find_by(level: level)
+      return render json: { error: "等级不存在，请先初始化配置" }, status: 404 unless config
+
+      updates = {}
+      updates[:min_score] = params[:min_score].to_i if params[:min_score].present?
+      updates[:max_score] = params[:max_score].present? ? params[:max_score].to_i : nil
+      updates[:daily_limit] = params[:daily_limit].present? ? params[:daily_limit].to_i : nil
+      updates[:fee_rate] = params[:fee_rate].to_d if params[:fee_rate].present?
+      updates[:score_rate] = params[:score_rate].to_d if params[:score_rate].present?
+
+      config.update!(updates) if updates.any?
+      render json: { ok: true }
+    end
   end
 end

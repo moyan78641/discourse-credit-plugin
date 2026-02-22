@@ -135,6 +135,17 @@
 // ========================================
 .credit-redenvelope-page, .credit-redenvelope-detail-page { max-width: 700px; margin: 0 auto; padding: 20px; }
 
+.credit-claim-url-card {
+  background: var(--success-low); border-radius: 8px; padding: 16px; margin-bottom: 16px;
+  p { margin: 0 0 8px; font-weight: 500; }
+  .claim-url-row { display: flex; gap: 8px; align-items: center; }
+  .claim-url-input {
+    flex: 1; padding: 8px 10px; border: 1px solid var(--primary-low-mid);
+    border-radius: 6px; background: var(--secondary); font-size: 0.9em;
+    color: var(--primary); font-family: monospace;
+  }
+}
+
 .credit-list {
   .credit-list-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -261,19 +272,66 @@
 // ========================================
 .credit-admin-page { max-width: 900px; margin: 0 auto; padding: 20px; }
 
+.admin-section-header {
+  margin-bottom: 12px;
+  h3 { margin: 0 0 4px; }
+  .section-desc { color: var(--primary-medium); font-size: 0.85em; margin: 0; }
+}
+
 .admin-stats-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;
 }
 .admin-stat-card {
   background: var(--primary-very-low); border-radius: 8px; padding: 20px; text-align: center;
+  .stat-icon { font-size: 1.5em; color: var(--tertiary); margin-bottom: 8px; .d-icon { width: 1em; height: 1em; } }
   .stat-label { font-size: 0.85em; color: var(--primary-medium); display: block; margin-bottom: 4px; }
   .stat-value { font-size: 1.8em; font-weight: 700; color: var(--tertiary); }
+}
+
+// Pay config table
+.admin-pay-configs {
+  background: var(--primary-very-low); border-radius: 8px; overflow: hidden;
+  .pay-config-header {
+    display: grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr 120px;
+    gap: 8px; padding: 10px 16px; font-weight: 600; font-size: 0.85em;
+    background: var(--primary-low); color: var(--primary-high);
+  }
+  .pay-config-row {
+    display: grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr 120px;
+    gap: 8px; padding: 10px 16px; align-items: center;
+    border-bottom: 1px solid var(--primary-low);
+    &:last-child { border-bottom: none; }
+    &.editing { background: var(--tertiary-very-low); }
+    input { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--primary-low-mid); width: 100%; }
+    .row-actions { display: flex; gap: 4px; }
+  }
+  .pay-level-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; font-weight: 600;
+    &.level-0 { background: var(--primary-low); color: var(--primary-high); }
+    &.level-1 { background: #fef3c7; color: #92400e; }
+    &.level-2 { background: #e0e7ff; color: #3730a3; }
+    &.level-3 { background: #1f2937; color: #f9fafb; }
+  }
+}
+
+// Fee info
+.admin-fee-info {
+  background: var(--primary-very-low); border-radius: 8px; padding: 16px;
+  .fee-info-row {
+    display: flex; align-items: center; gap: 12px; padding: 8px 0;
+    border-bottom: 1px solid var(--primary-low);
+    &:last-child { border-bottom: none; }
+  }
+  .fee-label { font-weight: 600; min-width: 120px; }
+  .fee-key { font-family: monospace; background: var(--primary-low); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+  .fee-desc { color: var(--primary-medium); font-size: 0.85em; flex: 1; }
+  .fee-tip { color: var(--tertiary); font-size: 0.85em; margin-top: 8px; font-style: italic; }
 }
 
 .admin-configs-list {
   .config-row {
     display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--primary-low); flex-wrap: wrap;
-    .config-key { font-weight: 600; min-width: 200px; font-size: 0.9em; }
+    .config-key { font-weight: 600; min-width: 200px; font-size: 0.9em; font-family: monospace; }
     .config-desc { color: var(--primary-medium); font-size: 0.8em; flex: 1; }
     .config-value { font-weight: 500; }
     input { max-width: 200px; padding: 4px 8px; }
