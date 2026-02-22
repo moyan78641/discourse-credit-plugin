@@ -1,0 +1,5 @@
+zh_CN:
+  site_settings:
+    credit_enabled: "启用积分系统插件"
+    credit_frontend_url: "支付跳转前端地址（留空使用站点地址）"
+    credit_new_user_balance: "新用户注册默认积分余额"

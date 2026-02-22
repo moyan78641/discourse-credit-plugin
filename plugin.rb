@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # name: discourse-credit-plugin
-# about: Sparkloc community credit system - wallet, transfer, red envelope, merchant, disputes
-# version: 0.1.0
+# about: Sparkloc community credit system - wallet, tipping, red envelope, merchant
+# version: 2.0.0
 # authors: Sparkloc
 # url: https://sparkloc.com
 
@@ -17,22 +17,14 @@ enabled_site_setting :credit_enabled
 register_asset "stylesheets/common/credit.scss"
 
 after_initialize do
-  register_svg_icon "wallet"
-  register_svg_icon "right-left"
-  register_svg_icon "gift"
-  register_svg_icon "chart-line"
-  register_svg_icon "store"
-  register_svg_icon "key"
-  register_svg_icon "gears"
-  register_svg_icon "gavel"
-  register_svg_icon "cart-shopping"
-  register_svg_icon "arrow-left"
-  register_svg_icon "plus"
-  register_svg_icon "magnifying-glass"
-  register_svg_icon "check"
-  register_svg_icon "xmark"
-  register_svg_icon "pen-to-square"
-  register_svg_icon "lock"
+  # SVG icons
+  %w[
+    wallet gift store cart-shopping arrow-left plus key gears
+    bolt-lightning envelope heart hand-holding-heart right-left
+    chart-line magnifying-glass check xmark pen-to-square lock
+    circle-plus receipt file-lines
+  ].each { |i| register_svg_icon i }
+
   # Load models
   plugin_root = File.dirname(__FILE__)
   %w[
@@ -40,9 +32,8 @@ after_initialize do
     credit_order
     credit_red_envelope
     credit_red_envelope_claim
-    credit_merchant_app
     credit_product
-    credit_dispute
+    credit_card_key
     credit_system_config
     credit_pay_config
   ].each { |m| require File.join(plugin_root, "app", "models", m) }
@@ -55,37 +46,18 @@ after_initialize do
     sync_credit_scores
     expire_credit_orders
     refund_expired_red_envelopes
-    auto_refund_disputes
   ].each { |j| require File.join(plugin_root, "app", "jobs", "scheduled", j) }
 
-  # Load regular jobs
-  %w[
-    credit_merchant_notify
-  ].each { |j| require File.join(plugin_root, "app", "jobs", "regular", j) }
-
-  # 注册顶层易支付兼容路由
+  # Ember shell 路由
   Discourse::Application.routes.prepend do
-    scope module: "discourse_credit", format: false do
-      # 主路径: /credit/pay/submit.php (通过引擎挂载)
-      # 顶层兼容路径
-      match "/pay/submit.php", to: "merchant_pay#create_order", via: [:get, :post]
-      get   "/api.php",        to: "merchant_pay#query_order"
-      post  "/api.php",        to: "merchant_pay#refund_order"
-      match "/credit-pay/submit.php", to: "merchant_pay#create_order", via: [:get, :post]
-      get   "/credit-api.php",        to: "merchant_pay#query_order"
-      post  "/credit-api.php",        to: "merchant_pay#refund_order"
-    end
-
-    # Ember shell 路由 — 直接访问 URL 时 Rails 返回 Ember 壳
     get "/credit" => "list#latest"
-    get "/credit/transfer" => "list#latest"
-    get "/credit/redenvelope" => "list#latest"
-    get "/credit/redenvelope/:id" => "list#latest"
     get "/credit/merchant" => "list#latest"
     get "/credit/product/:id" => "list#latest"
-    get "/credit/disputes" => "list#latest"
-    get "/credit/dashboard" => "list#latest"
     get "/credit/admin" => "list#latest"
-    get "/credit/pay" => "list#latest"
+  end
+
+  # Markdown 扩展：渲染红包卡片 [red-envelope id=xxx]
+  on(:before_post_process_cooked) do |doc, post|
+    # 处理红包标记
   end
 end

@@ -1,0 +1,16 @@
+zh_CN:
+  js:
+    credit:
+      title: "积分系统"
+      wallet: "钱包"
+      transfer: "转账"
+      red_envelope: "红包"
+      merchant: "商户"
+      disputes: "争议"
+      dashboard: "统计"
+      admin: "管理"
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          credit: "积分系统"

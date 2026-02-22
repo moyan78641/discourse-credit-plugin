@@ -1,0 +1,11 @@
+plugins:
+  credit_enabled:
+    default: true
+    client: true
+  credit_frontend_url:
+    default: ""
+    client: true
+  credit_new_user_balance:
+    default: 0
+    min: 0
+    client: true
