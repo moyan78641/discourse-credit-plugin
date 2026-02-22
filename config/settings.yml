@@ -1,0 +1,7 @@
+plugins:
+  credit_enabled:
+    default: true
+    client: true
+  credit_frontend_url:
+    default: ""
+    client: true
