@@ -82,6 +82,23 @@
   }
 }
 
+// Pay key required panel
+.credit-paykey-required {
+  max-width: 420px; margin: 40px auto; text-align: center;
+  background: var(--primary-very-low); border-radius: 12px; padding: 40px 32px;
+  .paykey-icon { font-size: 2.5em; color: var(--tertiary); margin-bottom: 12px; .d-icon { width: 1em; height: 1em; } }
+  h3 { margin: 0 0 8px; }
+  p { color: var(--primary-medium); margin-bottom: 20px; }
+  .paykey-form { text-align: left; max-width: 320px; margin: 0 auto; }
+  .btn-large { width: 100%; padding: 12px; font-size: 1.05em; margin-top: 8px; }
+}
+
+// Leaderboard info row in wallet card
+.wallet-leaderboard-info {
+  display: flex; gap: 16px; margin-bottom: 16px; font-size: 0.85em; opacity: 0.85;
+  .d-icon { width: 0.9em; height: 0.9em; margin-right: 4px; }
+}
+
 .credit-orders-section {
   .orders-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .order-type-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--primary-low-mid); }

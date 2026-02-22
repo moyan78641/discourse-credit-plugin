@@ -2,3 +2,4 @@ en:
   site_settings:
     credit_enabled: "Enable the credit system plugin"
     credit_frontend_url: "Frontend URL for payment redirect (leave empty to use site URL)"
+    credit_new_user_balance: "Initial credit balance for new users"

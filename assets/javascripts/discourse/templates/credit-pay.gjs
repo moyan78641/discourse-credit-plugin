@@ -5,6 +5,7 @@ import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditPayPage extends Component {
   @tracked order = null;
@@ -61,13 +62,13 @@ class CreditPayPage extends Component {
 
   <template>
     <div class="credit-pay-page">
-      <h2>💳 收银台</h2>
+      <h2>{{icon "shopping-cart"}} 收银台</h2>
 
       {{#if this.loading}}
         <p class="loading-text">加载中...</p>
       {{else if this.paySuccess}}
         <div class="pay-success-card">
-          <h3>✅ 支付成功</h3>
+          <h3>{{icon "check"}} 支付成功</h3>
           {{#if this.returnUrl}}
             <a href={{this.returnUrl}} class="btn btn-primary">返回商户</a>
           {{else}}

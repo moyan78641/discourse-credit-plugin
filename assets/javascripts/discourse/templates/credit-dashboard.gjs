@@ -5,6 +5,7 @@ import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditDashboardPage extends Component {
   @tracked overview = null;
@@ -36,8 +37,8 @@ class CreditDashboardPage extends Component {
 
   <template>
     <div class="credit-dashboard-page">
-      <h2>📊 统计面板</h2>
-      <a href="/credit" class="btn btn-small btn-default credit-back-btn">← 返回钱包</a>
+      <h2>{{icon "chart-line"}} 统计面板</h2>
+      <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       {{#if this.loading}}
         <p class="loading-text">加载中...</p>

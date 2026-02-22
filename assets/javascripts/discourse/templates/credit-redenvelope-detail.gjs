@@ -5,6 +5,7 @@ import { action } from "@ember/object";
 import { on } from "@ember/modifier";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditRedEnvelopeDetailPage extends Component {
   @tracked envelope = null;
@@ -54,7 +55,7 @@ class CreditRedEnvelopeDetailPage extends Component {
 
   <template>
     <div class="credit-redenvelope-detail-page">
-      <a href="/credit/redenvelope" class="btn btn-small btn-default credit-back-btn">← 返回红包</a>
+      <a href="/credit/redenvelope" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回红包</a>
 
       {{#if this.loading}}
         <p class="loading-text">加载中...</p>
@@ -63,7 +64,7 @@ class CreditRedEnvelopeDetailPage extends Component {
       {{else if this.envelope}}
         <div class="redenvelope-card">
           <div class="re-header">
-            <h2>🧧 {{this.envelope.sender_username}} 的红包</h2>
+            <h2>{{icon "gift"}} {{this.envelope.sender_username}} 的红包</h2>
             <p class="re-message">{{this.envelope.message}}</p>
           </div>
 
@@ -76,14 +77,14 @@ class CreditRedEnvelopeDetailPage extends Component {
           </div>
 
           {{#if this.claimResult}}
-            <div class="credit-success">🎉 领取成功！获得 {{this.claimResult.amount}} 积分</div>
+            <div class="credit-success">{{icon "check"}} 领取成功！获得 {{this.claimResult.amount}} 积分</div>
           {{/if}}
 
           {{#if this.envelope.has_claimed}}
             <div class="re-my-claim">您已领取 {{this.envelope.my_amount}} 积分</div>
           {{else if this.canClaim}}
             <button class="btn btn-primary" type="button" disabled={{this.claiming}} {{on "click" this.claimEnvelope}}>
-              {{if this.claiming "领取中..." "🧧 领取红包"}}
+              {{if this.claiming "领取中..." "领取红包"}}
             </button>
           {{/if}}
 

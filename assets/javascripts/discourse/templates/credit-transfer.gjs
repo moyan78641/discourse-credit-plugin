@@ -6,6 +6,7 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditTransferPage extends Component {
   @tracked toUsername = "";
@@ -75,8 +76,8 @@ class CreditTransferPage extends Component {
 
   <template>
     <div class="credit-transfer-page">
-      <h2>💸 转账</h2>
-      <a href="/credit" class="btn btn-small btn-default credit-back-btn">← 返回钱包</a>
+      <h2>{{icon "exchange-alt"}} 转账</h2>
+      <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       {{#if this.error}}<div class="credit-error">{{this.error}}</div>{{/if}}
       {{#if this.success}}<div class="credit-success">{{this.success}}</div>{{/if}}

@@ -6,6 +6,7 @@ import { on } from "@ember/modifier";
 import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditProductDetailPage extends Component {
   @tracked product = null;
@@ -59,7 +60,7 @@ class CreditProductDetailPage extends Component {
 
   <template>
     <div class="credit-product-detail-page">
-      <a href="/credit" class="btn btn-small btn-default credit-back-btn">← 返回</a>
+      <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回</a>
 
       {{#if this.loading}}
         <p class="loading-text">加载中...</p>
@@ -84,7 +85,7 @@ class CreditProductDetailPage extends Component {
           </div>
 
           {{#if this.buySuccess}}
-            <div class="credit-success">🎉 购买成功！</div>
+            <div class="credit-success">{{icon "check"}} 购买成功！</div>
           {{/if}}
 
           <div class="product-buy-section">
@@ -93,7 +94,7 @@ class CreditProductDetailPage extends Component {
               <input type="password" maxlength="6" value={{this.payKey}} placeholder="6位数字密码" {{on "input" this.updatePayKey}} />
             </div>
             <button class="btn btn-primary" type="button" disabled={{this.buying}} {{on "click" this.buyProduct}}>
-              {{if this.buying "购买中..." "💰 立即购买"}}
+              {{if this.buying "购买中..." "立即购买"}}
             </button>
           </div>
         </div>

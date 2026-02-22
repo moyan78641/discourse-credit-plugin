@@ -14,42 +14,60 @@ module Jobs
         user = User.find_by(id: wallet.user_id)
         next unless user&.active
 
-        # Get current gamification score via direct DB query
         current_score = fetch_gamification_score(user.id)
-        next if current_score <= 0
-
         delta = current_score - wallet.initial_leaderboard_score
-        next if delta <= 0
+        # delta 可以是负数（违规扣分后分数低于注册基准）
+        target_community = [delta, 0].max
 
-        already_synced = wallet.community_balance >= delta
-        next if already_synced
-
-        to_add = BigDecimal(delta.to_s) - wallet.community_balance
-        next if to_add <= 0
+        diff = BigDecimal(target_community.to_s) - wallet.community_balance
+        next if diff == 0
 
         ActiveRecord::Base.transaction do
-          CreditWallet.where(id: wallet.id).update_all(
-            "available_balance = available_balance + #{to_add}, " \
-            "community_balance = #{delta}, " \
-            "total_community = total_community + #{to_add}, " \
-            "total_receive = total_receive + #{to_add}",
-          )
+          if diff > 0
+            # 分数增加，加积分
+            CreditWallet.where(id: wallet.id).update_all(
+              "available_balance = available_balance + #{diff}, " \
+              "community_balance = #{target_community}, " \
+              "total_community = total_community + #{diff}, " \
+              "total_receive = total_receive + #{diff}",
+            )
 
-          CreditOrder.create!(
-            order_name: "社区积分同步",
-            payer_user_id: 0,
-            payee_user_id: wallet.user_id,
-            amount: to_add,
-            status: "success",
-            order_type: "community",
-            remark: "Leaderboard 积分同步 (当前:#{current_score}, 基准:#{wallet.initial_leaderboard_score}, 差值:#{delta})",
-            trade_time: Time.current,
-            expires_at: Time.current,
-          )
+            CreditOrder.create!(
+              order_name: "社区积分同步",
+              payer_user_id: 0,
+              payee_user_id: wallet.user_id,
+              amount: diff,
+              status: "success",
+              order_type: "community",
+              remark: "积分增加 (当前:#{current_score}, 基准:#{wallet.initial_leaderboard_score}, 社区积分:#{target_community})",
+              trade_time: Time.current,
+              expires_at: Time.current,
+            )
+          else
+            # 分数减少，扣积分（diff 是负数，取绝对值）
+            deduct = diff.abs
+            CreditWallet.where(id: wallet.id).update_all(
+              "available_balance = GREATEST(available_balance - #{deduct}, 0), " \
+              "community_balance = #{target_community}, " \
+              "total_community = GREATEST(total_community - #{deduct}, 0)",
+            )
+
+            CreditOrder.create!(
+              order_name: "社区积分扣减",
+              payer_user_id: wallet.user_id,
+              payee_user_id: 0,
+              amount: deduct,
+              status: "success",
+              order_type: "community",
+              remark: "积分扣减 (当前:#{current_score}, 基准:#{wallet.initial_leaderboard_score}, 社区积分:#{target_community})",
+              trade_time: Time.current,
+              expires_at: Time.current,
+            )
+          end
         end
 
         sync_count += 1
-        sleep 0.05 # Small delay between batches
+        sleep 0.05
       rescue => e
         Rails.logger.warn("[SyncCreditScores] user #{wallet.user_id} failed: #{e.message}")
       end
@@ -60,14 +78,12 @@ module Jobs
     private
 
     def fetch_gamification_score(user_id)
-      # Direct query to gamification plugin's table
       result = DB.query_single(
         "SELECT score FROM gamification_score_events_mv WHERE user_id = :uid LIMIT 1",
         uid: user_id,
       )
       result.first || 0
     rescue
-      # Fallback: try user custom field or gamification_score column
       user = User.find_by(id: user_id)
       user&.respond_to?(:gamification_score) ? (user.gamification_score || 0) : 0
     end

@@ -18,6 +18,8 @@ module ::DiscourseCredit
         total_payment: wallet.total_payment.to_f,
         total_transfer: wallet.total_transfer.to_f,
         community_balance: wallet.community_balance.to_f,
+        initial_leaderboard_score: wallet.initial_leaderboard_score,
+        current_leaderboard_score: fetch_gamification_score(current_user.id),
         pay_score: wallet.pay_score,
         pay_level: wallet.pay_level,
         pay_level_name: wallet.pay_level_name,
@@ -125,8 +127,8 @@ module ::DiscourseCredit
       return wallet if wallet
 
       # New user — get gamification_score baseline
-      initial_score = current_user.respond_to?(:gamification_score) ? (current_user.gamification_score || 0) : 0
-      initial_credit = config_get_i("new_user_initial_credit").to_d
+      initial_score = fetch_gamification_score(current_user.id)
+      initial_credit = SiteSetting.credit_new_user_balance.to_d
 
       wallet = CreditWallet.create!(
         user_id: current_user.id,
@@ -153,6 +155,17 @@ module ::DiscourseCredit
       end
 
       wallet
+    end
+
+    def fetch_gamification_score(user_id)
+      result = DB.query_single(
+        "SELECT score FROM gamification_score_events_mv WHERE user_id = :uid LIMIT 1",
+        uid: user_id,
+      )
+      result.first || 0
+    rescue
+      user = User.find_by(id: user_id)
+      user&.respond_to?(:gamification_score) ? (user.gamification_score || 0) : 0
     end
   end
 end

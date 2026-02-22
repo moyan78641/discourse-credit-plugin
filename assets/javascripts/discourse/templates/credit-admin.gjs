@@ -7,6 +7,7 @@ import { fn } from "@ember/helper";
 import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditAdminPage extends Component {
   @tracked tab = "stats";
@@ -130,8 +131,8 @@ class CreditAdminPage extends Component {
 
   <template>
     <div class="credit-admin-page">
-      <h2>🔧 积分管理后台</h2>
-      <a href="/credit" class="btn btn-small btn-default credit-back-btn">← 返回钱包</a>
+      <h2>{{icon "cogs"}} 积分管理后台</h2>
+      <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       <div class="credit-tabs">
         <button class="btn {{if this.isStatsTab 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "stats")}}>统计</button>

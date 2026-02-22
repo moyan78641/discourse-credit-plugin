@@ -6,6 +6,7 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { ajax } from "discourse/lib/ajax";
 import { i18n } from "discourse-i18n";
+import icon from "discourse/helpers/d-icon";
 
 class CreditRedEnvelopePage extends Component {
   @tracked tab = "create";
@@ -86,8 +87,8 @@ class CreditRedEnvelopePage extends Component {
 
   <template>
     <div class="credit-redenvelope-page">
-      <h2>🧧 红包</h2>
-      <a href="/credit" class="btn btn-small btn-default credit-back-btn">← 返回钱包</a>
+      <h2>{{icon "gift"}} 红包</h2>
+      <a href="/credit" class="btn btn-small btn-default credit-back-btn">{{icon "arrow-left"}} 返回钱包</a>
 
       <div class="credit-tabs">
         <button class="btn {{if this.isCreate 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.switchTab "create")}}>发红包</button>
@@ -124,7 +125,7 @@ class CreditRedEnvelopePage extends Component {
               <input type="password" maxlength="6" value={{this.payKey}} placeholder="6位数字密码" {{on "input" this.updatePayKey}} />
             </div>
             <button class="btn btn-primary" type="button" disabled={{this.submitting}} {{on "click" this.createEnvelope}}>
-              {{if this.submitting "创建中..." "🧧 发红包"}}
+              {{if this.submitting "创建中..." "发红包"}}
             </button>
           </div>
       {{/if}}
@@ -138,7 +139,7 @@ class CreditRedEnvelopePage extends Component {
           {{#each this.sentList as |e|}}
             <a href="/credit/redenvelope/{{e.id}}" class="credit-list-row">
               <div class="list-info">
-                <span class="list-title">🧧 {{e.type}} · {{e.total_count}}个</span>
+                <span class="list-title">{{icon "gift"}} {{e.type}} · {{e.total_count}}个</span>
                 <span class="list-meta">{{e.message}} · {{e.status}}</span>
               </div>
               <span class="list-amount">{{e.total_amount}}</span>
