@@ -2,7 +2,7 @@
 
 module ::DiscourseCredit
   class AdminController < BaseController
-    before_action :ensure_credit_admin
+    before_action :ensure_credit_admin, except: [:my_apps, :create_app, :update_app, :regenerate_token]
 
     # GET /credit/admin/configs.json
     def configs
@@ -168,6 +168,75 @@ module ::DiscourseCredit
 
       config.update!(updates) if updates.any?
       render json: { ok: true }
+    end
+
+    # === 应用管理（任何已登录用户都可以创建应用） ===
+
+    # GET /credit/apps.json — 我的应用列表
+    def my_apps
+      apps = CreditMerchantApp.where(user_id: current_user.id).order(created_at: :desc)
+      render json: {
+        apps: apps.map { |a|
+          {
+            id: a.id,
+            app_name: a.app_name,
+            client_id: a.client_id,
+            token: a.token,
+            callback_url: a.callback_url,
+            description: a.description,
+            is_active: a.is_active,
+            created_at: a.created_at&.iso8601,
+          }
+        },
+      }
+    end
+
+    # POST /credit/apps.json — 创建应用
+    def create_app
+      app_name = params[:app_name].to_s.strip
+      return render json: { error: "请填写应用名称" }, status: 400 if app_name.blank?
+
+      app = CreditMerchantApp.create!(
+        user_id: current_user.id,
+        app_name: app_name,
+        client_id: "pay_#{SecureRandom.hex(12)}",
+        client_secret: SecureRandom.hex(32),
+        callback_url: params[:callback_url].to_s.strip,
+        description: params[:description].to_s.strip[0..499],
+        is_active: true,
+      )
+
+      render json: {
+        id: app.id,
+        app_name: app.app_name,
+        client_id: app.client_id,
+        token: app.token,
+        callback_url: app.callback_url,
+      }
+    end
+
+    # PUT /credit/apps/:id.json — 更新应用
+    def update_app
+      app = CreditMerchantApp.find_by(id: params[:id], user_id: current_user.id)
+      return render json: { error: "应用不存在" }, status: 404 unless app
+
+      updates = {}
+      updates[:app_name] = params[:app_name] if params[:app_name].present?
+      updates[:callback_url] = params[:callback_url] if params.key?(:callback_url)
+      updates[:description] = params[:description] if params.key?(:description)
+      updates[:is_active] = (params[:is_active] == "true" || params[:is_active] == true) if params.key?(:is_active)
+
+      app.update!(updates) if updates.any?
+      render json: { ok: true }
+    end
+
+    # POST /credit/apps/:id/token.json — 重新生成 token
+    def regenerate_token
+      app = CreditMerchantApp.find_by(id: params[:id], user_id: current_user.id)
+      return render json: { error: "应用不存在" }, status: 404 unless app
+
+      app.generate_token!
+      render json: { token: app.token }
     end
   end
 end

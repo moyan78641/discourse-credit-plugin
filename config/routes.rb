@@ -50,6 +50,18 @@ DiscourseCredit::Engine.routes.draw do
   get  "/admin/stats"         => "admin#stats"
   get  "/admin/pay-configs"   => "admin#pay_configs"
   put  "/admin/pay-configs"   => "admin#update_pay_config"
+
+  # 外部支付网关
+  post "/payment/pay/:payment_id/process" => "payment#process_payment"
+  get  "/payment/pay/:transaction_id"     => "payment#pay_page"
+  post "/payment/confirm/:transaction_id" => "payment#confirm"
+  post "/payment/query/:payment_id"       => "payment#query"
+
+  # 应用管理（商户创建/管理自己的应用）
+  get  "/apps"          => "admin#my_apps"
+  post "/apps"          => "admin#create_app"
+  put  "/apps/:id"      => "admin#update_app"
+  post "/apps/:id/token" => "admin#regenerate_token"
 end
 
 Discourse::Application.routes.draw do

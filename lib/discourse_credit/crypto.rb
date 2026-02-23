@@ -61,5 +61,22 @@ module ::DiscourseCredit
       return false if decrypted.nil?
       ActiveSupport::SecurityUtils.secure_compare(decrypted, input_key)
     end
+
+    # HMAC-SHA256 签名（外部支付网关用）
+    def hmac_sign(secret_key, params)
+      param_string = params.sort.map { |k, v| "#{k}=#{v}" }.join("&")
+      OpenSSL::HMAC.hexdigest("SHA256", secret_key, param_string)
+    end
+
+    # 验证 HMAC 签名
+    def hmac_verify(secret_key, params, signature)
+      expected = hmac_sign(secret_key, params)
+      ActiveSupport::SecurityUtils.secure_compare(expected, signature.to_s)
+    end
+
+    # 生成交易 ID
+    def generate_transaction_id
+      "txn_#{SecureRandom.hex(16)}"
+    end
   end
 end
