@@ -23,7 +23,7 @@ module ::DiscourseCredit
         is_admin: wallet.is_admin || current_user.admin?,
         has_pay_key: wallet.has_pay_key?,
         daily_limit: config&.daily_limit,
-        fee_rate: config&.fee_rate&.to_f || 0,
+        fee_rate: resolve_fee_rate(wallet, "tip_fee_rate"),
         created_at: wallet.created_at,
       }
     end
@@ -74,11 +74,19 @@ module ::DiscourseCredit
         payee = user_map[o.payee_user_id]
         is_income = o.payee_user_id == current_user.id && o.payer_user_id != current_user.id
 
+        # 显示金额：收入方看 actual_amount，支出方看 amount + fee
+        display_amount = if is_income
+          o.actual_amount.to_f
+        else
+          (o.amount + (o.fee_amount || 0)).to_f
+        end
+
         {
           id: o.id,
           order_no: o.order_no,
           order_name: o.order_name,
           amount: o.amount.to_f,
+          display_amount: display_amount,
           fee_rate: o.fee_rate.to_f,
           fee_amount: o.fee_amount.to_f,
           actual_amount: o.actual_amount.to_f,

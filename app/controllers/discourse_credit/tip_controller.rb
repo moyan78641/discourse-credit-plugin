@@ -10,7 +10,7 @@ module ::DiscourseCredit
     # params: target_user_id, amount, pay_key, tip_type (topic/comment/profile), post_id (optional)
     def create
       target_user_id = params[:target_user_id].to_i
-      amount = params[:amount].to_f
+      amount = params[:amount].to_d rescue 0
       pay_key_input = params[:pay_key]
       tip_type = params[:tip_type] || "profile"
       post_id = params[:post_id]
@@ -31,9 +31,11 @@ module ::DiscourseCredit
       return unless verify_pay_key!(pay_key_input)
 
       wallet = current_wallet!
-      fee_rate = config_get_f("tip_fee_rate")
+
+      # 费率：优先用户等级费率，fallback 到全局 tip_fee_rate
+      fee_rate = resolve_fee_rate(wallet, "tip_fee_rate")
       fee_amount = (amount * fee_rate).round(2)
-      total_deduct = amount + fee_amount  # 手续费额外扣除
+      total_deduct = amount + fee_amount  # 手续费从发起者额外扣
 
       if wallet.available_balance < total_deduct
         return render json: { error: "余额不足（含手续费 #{fee_amount}）" }, status: 400
@@ -53,17 +55,24 @@ module ::DiscourseCredit
       remark += " (帖子##{post_id})" if post_id.present?
 
       ActiveRecord::Base.transaction do
-        wallet.update!(available_balance: wallet.available_balance - total_deduct, total_payment: wallet.total_payment + total_deduct)
-        target_wallet.update!(available_balance: target_wallet.available_balance + amount, total_receive: target_wallet.total_receive + amount)
+        wallet.update!(
+          available_balance: wallet.available_balance - total_deduct,
+          total_payment: wallet.total_payment + total_deduct,
+        )
+        # 接收方收到完整的打赏金额（不含手续费）
+        target_wallet.update!(
+          available_balance: target_wallet.available_balance + amount,
+          total_receive: target_wallet.total_receive + amount,
+        )
 
         order = CreditOrder.create!(
           order_name: "打赏 @#{target_user.username}",
           payer_user_id: current_user.id,
           payee_user_id: target_user_id,
-          amount: total_deduct,
+          amount: amount,           # 实际打赏金额（不含手续费）
           fee_rate: fee_rate,
           fee_amount: fee_amount,
-          actual_amount: amount,
+          actual_amount: amount,     # 接收方实际到账
           status: "success",
           order_type: "tip",
           remark: remark,
@@ -71,7 +80,17 @@ module ::DiscourseCredit
           trade_time: Time.current,
         )
 
-        render json: { success: true, order_no: order.order_no, amount: amount, fee_amount: fee_amount, actual_amount: amount, total_deduct: total_deduct }
+        # 累积发起者的 pay_score
+        accumulate_pay_score!(wallet, total_deduct)
+
+        render json: {
+          success: true,
+          order_no: order.order_no,
+          amount: amount.to_f,
+          fee_amount: fee_amount.to_f,
+          actual_amount: amount.to_f,
+          total_deduct: total_deduct.to_f,
+        }
       end
     end
 
@@ -83,7 +102,8 @@ module ::DiscourseCredit
       user_ids = tips.map(&:payer_user_id).uniq
       users = User.where(id: user_ids).index_by(&:id)
 
-      total = tips.sum(:amount).to_f
+      # 用 actual_amount 统计实际打赏金额（不含手续费）
+      total = tips.sum(:actual_amount).to_f
 
       render json: {
         total_amount: total,
@@ -93,7 +113,7 @@ module ::DiscourseCredit
           {
             username: u&.username,
             avatar_template: u&.avatar_template,
-            amount: t.amount.to_f,
+            amount: t.actual_amount.to_f,  # 显示实际打赏金额
             created_at: t.created_at&.iso8601,
           }
         },

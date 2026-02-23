@@ -57,5 +57,27 @@ module ::DiscourseCredit
     def config_get_f(key)
       CreditSystemConfig.get_f(key)
     end
+
+    # 获取用户实际费率：优先等级费率，fallback 到全局配置
+    # 注意：等级费率为 0 也是有效值（VIP免手续费），只有未配置时才 fallback
+    def resolve_fee_rate(wallet, config_key)
+      pay_config = wallet.pay_config
+      if pay_config && pay_config.fee_rate.present?
+        pay_config.fee_rate.to_f
+      else
+        config_get_f(config_key)
+      end
+    end
+
+    # 交易后累积 pay_score
+    def accumulate_pay_score!(wallet, spent_amount)
+      rate = config_get_f("pay_score_rate")
+      return if rate <= 0 || spent_amount <= 0
+      score_delta = (spent_amount.to_d * rate).round(0).to_i
+      return if score_delta <= 0
+      CreditWallet.where(id: wallet.id).update_all(
+        ["pay_score = pay_score + ?", score_delta],
+      )
+    end
   end
 end

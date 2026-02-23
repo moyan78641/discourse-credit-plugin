@@ -8,7 +8,7 @@ module Jobs
       return unless SiteSetting.credit_enabled
 
       # 争议超过48h未处理，自动退款 + 额外扣卖家补偿
-      compensation_rate = 0.1 # 额外扣10%作为补偿
+      compensation_rate = CreditSystemConfig.get_f("dispute_compensation_rate")
 
       CreditDispute.expired.find_each do |dispute|
         order = CreditOrder.find_by(id: dispute.order_id)
@@ -18,7 +18,7 @@ module Jobs
           buyer_wallet = CreditWallet.find_by(user_id: order.payer_user_id)
           seller_wallet = CreditWallet.find_by(user_id: order.payee_user_id)
 
-          # 退还买家全额
+          # 退还买家全额（商品原价）
           if buyer_wallet
             buyer_wallet.update!(
               available_balance: buyer_wallet.available_balance + order.amount,
@@ -26,8 +26,9 @@ module Jobs
             )
           end
 
-          # 扣除卖家实际到账
-          if seller_wallet
+          # 只有卖家已到账的情况才扣回
+          seller_received = order.delivery_status.nil? || order.delivery_status == "delivered"
+          if seller_wallet && seller_received
             seller_wallet.update!(
               available_balance: seller_wallet.available_balance - order.actual_amount,
               total_receive: [seller_wallet.total_receive - order.actual_amount, 0].max,

@@ -26,7 +26,7 @@ module ::DiscourseCredit
       min_total = BigDecimal("0.01") * count
       return render json: { error: "红包金额太小" }, status: 400 if amount < min_total
 
-      fee_rate = config_get_f("red_envelope_fee_rate")
+      fee_rate = resolve_fee_rate(wallet, "red_envelope_fee_rate")
       fee_amount = (amount * fee_rate).round(2)
       total_deduct = amount + fee_amount
 
@@ -63,15 +63,18 @@ module ::DiscourseCredit
           order_name: "发红包 (#{count}个)",
           payer_user_id: current_user.id,
           payee_user_id: 0,
-          amount: total_deduct,
+          amount: amount,           # 红包实际金额（不含手续费）
           fee_rate: fee_rate,
           fee_amount: fee_amount,
-          actual_amount: amount,
+          actual_amount: amount,     # 红包实际金额
           status: "success",
           order_type: "red_envelope_send",
           remark: "#{envelope_type == 'random' ? '拼手气' : '均分'}红包#{message.present? ? ': ' + message : ''}",
           trade_time: Time.current,
         )
+
+        # 累积发起者的 pay_score
+        accumulate_pay_score!(wallet, total_deduct)
       end
 
       render json: { id: envelope.id, message: "红包创建成功" }

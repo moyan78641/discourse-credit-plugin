@@ -181,7 +181,7 @@ class CreditWalletPage extends Component {
                       <span class="order-name">{{order.order_name}}</span>
                       <span class="order-meta">{{order.type}} · {{order.status}} · {{order.order_no}}</span>
                     </div>
-                    <span class="order-amount">{{if order.is_income "+" "-"}}{{order.amount}}</span>
+                    <span class="order-amount">{{if order.is_income "+" "-"}}{{order.display_amount}}</span>
                   </div>
                 {{/each}}
               </div>

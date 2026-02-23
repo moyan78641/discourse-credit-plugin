@@ -5,7 +5,7 @@ class CreditOrder < ActiveRecord::Base
 
   # Order types (v2: 去掉 transfer/online/distribute, 新增 tip/product)
   TYPES = %w[
-    receive payment community
+    receive payment community distribute
     tip product product_refund dispute_compensation
     red_envelope_send red_envelope_receive red_envelope_refund
   ].freeze

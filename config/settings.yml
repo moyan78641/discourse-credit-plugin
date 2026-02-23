@@ -9,3 +9,4 @@ plugins:
     default: 100
     min: 0
     client: true
+    description: "新用户初始积分（唯一配置源）"

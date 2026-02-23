@@ -146,8 +146,17 @@ module ::DiscourseCredit
         perform_refund!(order, "卖家主动退款")
       else
         order.update!(delivery_status: new_status)
-        # 发货时站内信通知买家
+        # 发货确认时，卖家到账（扣除手续费）
         if new_status == "delivered"
+          seller_wallet = CreditWallet.find_by(user_id: current_user.id)
+          if seller_wallet
+            actual_amount = order.actual_amount
+            seller_wallet.update!(
+              available_balance: seller_wallet.available_balance + actual_amount,
+              total_receive: seller_wallet.total_receive + actual_amount,
+            )
+          end
+
           buyer = User.find_by(id: order.payer_user_id)
           if buyer
             PostCreator.create!(
@@ -188,7 +197,8 @@ module ::DiscourseCredit
 
       wallet = current_wallet!
       amount = product.price
-      fee_rate = config_get_f("merchant_fee_rate")
+      # 费率：优先用户等级费率，fallback 到全局 merchant_fee_rate
+      fee_rate = resolve_fee_rate(wallet, "merchant_fee_rate")
       fee_amount = (amount * fee_rate).round(2)
       actual_amount = (amount - fee_amount).round(2)
 
@@ -207,15 +217,20 @@ module ::DiscourseCredit
       order = nil
 
       ActiveRecord::Base.transaction do
-        # 非卡密商品：买家扣款，但卖家暂不到账（待发货后到账）
+        # 买家扣款
+        wallet.update!(
+          available_balance: wallet.available_balance - amount,
+          total_payment: wallet.total_payment + amount,
+        )
+
         if product.auto_delivery
-          wallet.update!(available_balance: wallet.available_balance - amount, total_payment: wallet.total_payment + amount)
-          seller_wallet.update!(available_balance: seller_wallet.available_balance + actual_amount, total_receive: seller_wallet.total_receive + actual_amount)
-        else
-          # 非卡密：先扣买家，卖家暂不加（发货后再加）
-          wallet.update!(available_balance: wallet.available_balance - amount, total_payment: wallet.total_payment + amount)
-          seller_wallet.update!(available_balance: seller_wallet.available_balance + actual_amount, total_receive: seller_wallet.total_receive + actual_amount)
+          # 卡密自动发货：卖家立即到账（扣除手续费）
+          seller_wallet.update!(
+            available_balance: seller_wallet.available_balance + actual_amount,
+            total_receive: seller_wallet.total_receive + actual_amount,
+          )
         end
+        # 非卡密商品：卖家暂不到账，发货确认后再到账
 
         if product.stock > 0
           product.update!(stock: product.stock - 1, sold_count: product.sold_count + 1)
@@ -250,6 +265,9 @@ module ::DiscourseCredit
             )
           end
         end
+
+        # 累积买家的 pay_score
+        accumulate_pay_score!(wallet, amount)
       end
 
       render json: {
@@ -360,7 +378,7 @@ module ::DiscourseCredit
         buyer_wallet = CreditWallet.find_by(user_id: order.payer_user_id)
         seller_wallet = CreditWallet.find_by(user_id: order.payee_user_id)
 
-        # 退还买家全额
+        # 退还买家全额（商品原价）
         if buyer_wallet
           buyer_wallet.update!(
             available_balance: buyer_wallet.available_balance + order.amount,
@@ -368,8 +386,9 @@ module ::DiscourseCredit
           )
         end
 
-        # 扣除卖家实际到账
-        if seller_wallet
+        # 只有卖家已到账的情况才扣回（已发货 or 卡密自动发货）
+        seller_received = order.delivery_status.nil? || order.delivery_status == "delivered"
+        if seller_wallet && seller_received
           seller_wallet.update!(
             available_balance: seller_wallet.available_balance - order.actual_amount,
             total_receive: [seller_wallet.total_receive - order.actual_amount, 0].max,

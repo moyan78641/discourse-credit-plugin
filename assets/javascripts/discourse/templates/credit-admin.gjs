@@ -259,19 +259,29 @@ class CreditAdminPage extends Component {
               <div class="fee-info-row">
                 <span class="fee-label">打赏手续费率</span>
                 <span class="fee-key">tip_fee_rate</span>
-                <span class="fee-desc">用户打赏时从金额中扣除的手续费比例</span>
+                <span class="fee-desc">打赏时从发起者额外扣除的手续费比例（等级费率优先）</span>
               </div>
               <div class="fee-info-row">
                 <span class="fee-label">商户手续费率</span>
                 <span class="fee-key">merchant_fee_rate</span>
-                <span class="fee-desc">商户收款时从订单金额中扣除的手续费比例</span>
+                <span class="fee-desc">商品交易时从卖家收款中扣除的手续费比例（等级费率优先）</span>
               </div>
               <div class="fee-info-row">
                 <span class="fee-label">红包手续费率</span>
                 <span class="fee-key">red_envelope_fee_rate</span>
-                <span class="fee-desc">发红包时额外收取的手续费比例</span>
+                <span class="fee-desc">发红包时从发起者额外扣除的手续费比例（等级费率优先）</span>
               </div>
-              <p class="fee-tip">以上费率可在「系统配置」标签页中修改具体数值</p>
+              <div class="fee-info-row">
+                <span class="fee-label">争议补偿费率</span>
+                <span class="fee-key">dispute_compensation_rate</span>
+                <span class="fee-desc">争议超时未处理时，从卖家额外扣除补偿买家的比例</span>
+              </div>
+              <div class="fee-info-row">
+                <span class="fee-label">交易积分倍率</span>
+                <span class="fee-key">pay_score_rate</span>
+                <span class="fee-desc">每消费1积分累积的pay_score，用于确定会员等级</span>
+              </div>
+              <p class="fee-tip">以上为全局默认费率，可在「系统配置」中修改。若用户等级费率 > 0，则优先使用等级费率。</p>
             </div>
           {{/if}}
         {{/if}}
