@@ -16,6 +16,7 @@ module ::DiscourseCredit
       description = params[:description].to_s[0..499]
       order_id = params[:order_id].to_s
       signature = params[:signature].to_s
+      is_test = params[:test_mode] == "true" || params[:test_mode] == true
 
       return render json: { error: "金额必须大于0" }, status: 400 if amount <= 0
       return render json: { error: "缺少 order_id" }, status: 400 if order_id.blank?
@@ -36,6 +37,7 @@ module ::DiscourseCredit
             transaction_id: existing.transaction_id,
             status: existing.status,
             amount: existing.amount.to_i,
+            is_test: existing.is_test,
           }
         else
           return render json: { error: "该 order_id 已存在且状态为 #{existing.status}" }, status: 409
@@ -58,6 +60,7 @@ module ::DiscourseCredit
         platform_fee: platform_fee,
         merchant_points: merchant_points,
         status: "pending",
+        is_test: is_test,
         expires_at: Time.current + 30.minutes,
       )
 
@@ -66,6 +69,7 @@ module ::DiscourseCredit
         transaction_id: transaction_id,
         status: "pending",
         amount: amount,
+        is_test: is_test,
       }
     end
 
@@ -85,6 +89,7 @@ module ::DiscourseCredit
         status: @txn.status,
         expired: @txn.expired?,
         expires_at: @txn.expires_at&.iso8601,
+        is_test: @txn.is_test,
       }
     end
 
@@ -100,6 +105,44 @@ module ::DiscourseCredit
       wallet = current_wallet!
       app = txn.merchant_app
       amount = txn.amount
+
+      if txn.is_test
+        # 测试模式：不动余额，允许自付，只创建订单记录
+        ActiveRecord::Base.transaction do
+          fee_rate = amount > 0 ? (txn.platform_fee / amount).to_f.round(4) : 0
+
+          order = CreditOrder.create!(
+            order_name: "[测试] 外部支付: #{txn.description}",
+            payer_user_id: current_user.id,
+            payee_user_id: app.user_id,
+            amount: amount,
+            fee_rate: fee_rate,
+            fee_amount: txn.platform_fee,
+            actual_amount: txn.merchant_points,
+            status: "success",
+            order_type: "product",
+            remark: "[测试] 外部订单##{txn.external_reference} via #{app.app_name}",
+            trade_time: Time.current,
+          )
+
+          txn.update!(
+            status: "completed",
+            payer_user_id: current_user.id,
+            credit_order_id: order.id,
+            paid_at: Time.current,
+          )
+        end
+
+        callback_url = build_callback_url(txn, app)
+        return render json: {
+          success: true,
+          transaction_id: txn.transaction_id,
+          callback_url: callback_url,
+          is_test: true,
+        }
+      end
+
+      # === 正式支付 ===
 
       # 防止自付（用户不能给自己的应用付款）
       if current_user.id == app.user_id

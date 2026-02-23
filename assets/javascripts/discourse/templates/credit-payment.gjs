@@ -32,6 +32,10 @@ class CreditPaymentPage extends Component {
     return this.txn && this.txn.status === "completed";
   }
 
+  get isTest() {
+    return this.txn && this.txn.is_test;
+  }
+
   async loadTransaction() {
     try {
       const data = await ajax(`/credit/payment/pay/${this.transactionId}.json`);
@@ -79,6 +83,9 @@ class CreditPaymentPage extends Component {
       {{else if this.success}}
         <div class="payment-success-card">
           <div class="success-icon">{{icon "check"}}</div>
+          {{#if this.isTest}}
+            <div class="payment-test-badge">{{icon "bolt-lightning"}} 测试交易</div>
+          {{/if}}
           <h2>支付成功</h2>
           <p>已支付 <span class="amount-highlight">{{this.txn.amount}}</span> 积分</p>
           <p class="payment-desc">{{this.txn.description}}</p>
@@ -115,6 +122,9 @@ class CreditPaymentPage extends Component {
             </div>
           {{else}}
             <div class="payment-confirm-card">
+              {{#if this.isTest}}
+                <div class="payment-test-badge">{{icon "bolt-lightning"}} 测试模式 — 不会产生实际扣款</div>
+              {{/if}}
               <div class="payment-app-name">
                 {{icon "store"}} {{this.txn.app_name}}
               </div>

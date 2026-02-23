@@ -687,3 +687,66 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+
+// ========================================
+// Test Payment & Modal
+// ========================================
+.payment-test-badge {
+  background: var(--highlight-low);
+  color: var(--highlight);
+  border: 1px solid var(--highlight-medium);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.credit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.credit-modal-card {
+  background: var(--secondary);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  h3 { margin: 0 0 8px; }
+}
+
+.test-hint {
+  color: var(--primary-medium);
+  font-size: 0.85em;
+  margin-bottom: 16px;
+}
+
+.test-result-card {
+  text-align: center;
+
+  .test-success-text {
+    color: var(--success);
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+
+  .credential-row {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .btn { margin: 4px; }
+}

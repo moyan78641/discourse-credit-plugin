@@ -62,6 +62,7 @@ DiscourseCredit::Engine.routes.draw do
   post "/apps"          => "admin#create_app"
   put  "/apps/:id"      => "admin#update_app"
   post "/apps/:id/token" => "admin#regenerate_token"
+  post "/apps/:id/test-payment" => "admin#test_payment"
 end
 
 Discourse::Application.routes.draw do
