@@ -651,7 +651,7 @@
   border-radius: 10px;
   &.active { background: var(--success-low); color: var(--success); }
   &.inactive { background: var(--danger-low); color: var(--danger); }
-  &.test { background: var(--highlight-low); color: var(--highlight); }
+  &.test { background: var(--highlight-low); color: var(--primary); }
 }
 
 .app-card-date { font-size: 0.8em; color: var(--primary-medium); }
@@ -694,7 +694,7 @@
 // ========================================
 .payment-test-badge {
   background: var(--highlight-low);
-  color: var(--highlight);
+  color: var(--primary);
   border: 1px solid var(--highlight-medium);
   border-radius: 6px;
   padding: 8px 12px;
