@@ -16,7 +16,6 @@ module ::DiscourseCredit
       description = params[:description].to_s[0..499]
       order_id = params[:order_id].to_s
       signature = params[:signature].to_s
-      is_test = params[:test_mode] == "true" || params[:test_mode] == true
 
       return render json: { error: "金额必须大于0" }, status: 400 if amount <= 0
       return render json: { error: "缺少 order_id" }, status: 400 if order_id.blank?
@@ -45,6 +44,9 @@ module ::DiscourseCredit
       end
 
       transaction_id = Crypto.generate_transaction_id
+
+      # 应用级测试模式
+      is_test = app.test_mode
 
       # 计算手续费
       fee_rate = CreditSystemConfig.get_f("merchant_fee_rate")

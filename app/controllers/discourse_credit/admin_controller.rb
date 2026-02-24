@@ -2,7 +2,7 @@
 
 module ::DiscourseCredit
   class AdminController < BaseController
-    before_action :ensure_credit_admin, except: [:my_apps, :create_app, :update_app, :regenerate_token, :test_payment]
+    before_action :ensure_credit_admin, except: [:my_apps, :create_app, :update_app, :regenerate_token]
 
     # GET /credit/admin/configs.json
     def configs
@@ -185,6 +185,7 @@ module ::DiscourseCredit
             callback_url: a.callback_url,
             description: a.description,
             is_active: a.is_active,
+            test_mode: a.test_mode,
             created_at: a.created_at&.iso8601,
           }
         },
@@ -225,6 +226,7 @@ module ::DiscourseCredit
       updates[:callback_url] = params[:callback_url] if params.key?(:callback_url)
       updates[:description] = params[:description] if params.key?(:description)
       updates[:is_active] = (params[:is_active] == "true" || params[:is_active] == true) if params.key?(:is_active)
+      updates[:test_mode] = (params[:test_mode] == "true" || params[:test_mode] == true) if params.key?(:test_mode)
 
       app.update!(updates) if updates.any?
       render json: { ok: true }
@@ -237,47 +239,6 @@ module ::DiscourseCredit
 
       app.generate_token!
       render json: { token: app.token }
-    end
-
-    # POST /credit/apps/:id/test-payment.json — 发起测试支付
-    def test_payment
-      app = CreditMerchantApp.find_by(id: params[:id], user_id: current_user.id)
-      return render json: { error: "应用不存在" }, status: 404 unless app
-      return render json: { error: "应用未启用" }, status: 400 unless app.is_active
-
-      amount = (params[:amount].presence || 10).to_i
-      amount = 1 if amount <= 0
-      description = params[:description].presence || "测试支付"
-      order_id = "test_#{Time.current.to_i}_#{SecureRandom.hex(4)}"
-
-      # 服务端直接构造签名，不需要前端算
-      sign_params = { amount: amount, description: description, order_id: order_id }
-      signature = Crypto.hmac_sign(app.secret_key, sign_params)
-
-      transaction_id = Crypto.generate_transaction_id
-      fee_rate = CreditSystemConfig.get_f("merchant_fee_rate")
-      platform_fee = (amount * fee_rate).round(2)
-      merchant_points = (amount - platform_fee).round(2)
-
-      txn = CreditPaymentTransaction.create!(
-        transaction_id: transaction_id,
-        merchant_app_id: app.id,
-        external_reference: order_id,
-        description: "[测试] #{description}",
-        amount: amount,
-        platform_fee: platform_fee,
-        merchant_points: merchant_points,
-        status: "pending",
-        is_test: true,
-        expires_at: Time.current + 30.minutes,
-      )
-
-      render json: {
-        payment_url: "#{Discourse.base_url}/credit/payment/pay/#{transaction_id}",
-        transaction_id: transaction_id,
-        amount: amount,
-        is_test: true,
-      }
     end
   end
 end

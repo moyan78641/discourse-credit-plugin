@@ -22,12 +22,6 @@ class CreditAppsPage extends Component {
   @tracked editFields = {};
   @tracked editSaving = false;
   @tracked copiedField = null;
-  @tracked testingAppId = null;
-  @tracked testAmount = "10";
-  @tracked testDesc = "测试支付";
-  @tracked testLoading = false;
-  @tracked testResult = null;
-  @tracked testError = null;
 
   constructor() {
     super(...arguments);
@@ -101,6 +95,15 @@ class CreditAppsPage extends Component {
     } catch (_) { /* ignore */ }
   }
 
+  @action async toggleTestMode(app) {
+    try {
+      await ajax(`/credit/apps/${app.id}.json`, {
+        type: "PUT", data: { test_mode: !app.test_mode },
+      });
+      await this.loadApps();
+    } catch (_) { /* ignore */ }
+  }
+
   @action async regenerateToken(appId) {
     if (!confirm("重新生成 Token 后，旧 Token 将立即失效。确定继续？")) return;
     try {
@@ -115,33 +118,6 @@ class CreditAppsPage extends Component {
     navigator.clipboard.writeText(text);
     this.copiedField = field;
     setTimeout(() => { this.copiedField = null; }, 1500);
-  }
-
-  @action openTestPayment(appId) {
-    this.testingAppId = appId;
-    this.testAmount = "10";
-    this.testDesc = "测试支付";
-    this.testResult = null;
-    this.testError = null;
-  }
-  @action closeTestPayment() { this.testingAppId = null; this.testResult = null; this.testError = null; }
-  @action stopPropagation(e) { e.stopPropagation(); }
-  @action updateTestAmount(e) { this.testAmount = e.target.value; }
-  @action updateTestDesc(e) { this.testDesc = e.target.value; }
-
-  @action async submitTestPayment() {
-    this.testLoading = true;
-    this.testResult = null;
-    this.testError = null;
-    try {
-      const data = await ajax(`/credit/apps/${this.testingAppId}/test-payment.json`, {
-        type: "POST",
-        data: { amount: this.testAmount, description: this.testDesc },
-      });
-      this.testResult = data;
-    } catch (e) {
-      this.testError = e.jqXHR?.responseJSON?.error || "测试支付发起失败";
-    } finally { this.testLoading = false; }
   }
 
   <template>
@@ -183,6 +159,9 @@ class CreditAppsPage extends Component {
                   <span class="app-status-badge {{if app.is_active 'active' 'inactive'}}">
                     {{if app.is_active "启用" "停用"}}
                   </span>
+                  {{#if app.test_mode}}
+                    <span class="app-status-badge test">测试模式</span>
+                  {{/if}}
                 </div>
                 <span class="app-card-date">{{app.created_at}}</span>
               </div>
@@ -200,6 +179,9 @@ class CreditAppsPage extends Component {
                       </div>
                     </div>
                   {{else}}
+                    {{#if app.test_mode}}
+                      <div class="payment-test-badge">{{icon "bolt-lightning"}} 测试模式已开启 — 通过此应用发起的支付不会产生实际扣款，允许自付</div>
+                    {{/if}}
                     <div class="app-credentials">
                       <div class="credential-row">
                         <span class="credential-label">Payment ID (client_id)</span>
@@ -231,10 +213,10 @@ class CreditAppsPage extends Component {
                       <button class="btn btn-small {{if app.is_active 'btn-default' 'btn-primary'}}" type="button" {{on "click" (fn this.toggleActive app)}}>
                         {{if app.is_active "停用" "启用"}}
                       </button>
+                      <button class="btn btn-small {{if app.test_mode 'btn-primary' 'btn-default'}}" type="button" {{on "click" (fn this.toggleTestMode app)}}>
+                        {{icon "bolt-lightning"}} {{if app.test_mode "关闭测试" "开启测试"}}
+                      </button>
                       <button class="btn btn-small btn-danger" type="button" {{on "click" (fn this.regenerateToken app.id)}}>{{icon "key"}} 重置 Token</button>
-                      {{#if app.is_active}}
-                        <button class="btn btn-small btn-primary" type="button" {{on "click" (fn this.openTestPayment app.id)}}>{{icon "bolt-lightning"}} 测试支付</button>
-                      {{/if}}
                     </div>
                   {{/if}}
                 </div>
@@ -244,44 +226,6 @@ class CreditAppsPage extends Component {
         </div>
       {{else}}
         <p class="no-data-text">暂无应用，点击上方按钮创建</p>
-      {{/if}}
-
-      {{#if this.testingAppId}}
-        <div class="credit-modal-overlay" role="button" {{on "click" this.closeTestPayment}}>
-          <div class="credit-modal-card" role="presentation" {{on "click" this.stopPropagation}}>
-            <h3>{{icon "bolt-lightning"}} 测试支付</h3>
-            <p class="test-hint">测试模式不会产生实际的余额变动，仅生成订单记录和回调。</p>
-            {{#if this.testError}}<div class="credit-error">{{this.testError}}</div>{{/if}}
-            {{#if this.testResult}}
-              <div class="test-result-card">
-                <p class="test-success-text">{{icon "check"}} 测试交易已创建</p>
-                <div class="credential-row">
-                  <span class="credential-label">交易ID</span>
-                  <code class="credential-value">{{this.testResult.transaction_id}}</code>
-                </div>
-                <a href={{this.testResult.payment_url}} class="btn btn-primary" target="_blank" rel="noopener">打开支付页面</a>
-                <button class="btn btn-default" type="button" {{on "click" this.closeTestPayment}}>关闭</button>
-              </div>
-            {{else}}
-              <div class="credit-form-card compact">
-                <div class="form-row">
-                  <label>支付金额</label>
-                  <input type="number" min="1" value={{this.testAmount}} {{on "input" this.updateTestAmount}} />
-                </div>
-                <div class="form-row">
-                  <label>交易描述</label>
-                  <input type="text" value={{this.testDesc}} {{on "input" this.updateTestDesc}} />
-                </div>
-                <div class="form-actions">
-                  <button class="btn btn-primary" type="button" disabled={{this.testLoading}} {{on "click" this.submitTestPayment}}>
-                    {{if this.testLoading "创建中..." "发起测试"}}
-                  </button>
-                  <button class="btn btn-default" type="button" {{on "click" this.closeTestPayment}}>取消</button>
-                </div>
-              </div>
-            {{/if}}
-          </div>
-        </div>
       {{/if}}
     </div>
   </template>

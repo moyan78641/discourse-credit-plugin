@@ -651,6 +651,7 @@
   border-radius: 10px;
   &.active { background: var(--success-low); color: var(--success); }
   &.inactive { background: var(--danger-low); color: var(--danger); }
+  &.test { background: var(--highlight-low); color: var(--highlight); }
 }
 
 .app-card-date { font-size: 0.8em; color: var(--primary-medium); }
