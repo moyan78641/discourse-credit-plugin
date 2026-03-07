@@ -11,13 +11,8 @@ export default apiInitializer("1.0", (api) => {
     },
   });
 
-  // post-stream 刷新时重新处理红包
-  api.onAppEvent("post-stream:refresh", () => {
-    processRedEnvelopes();
-  });
-
   // 渲染帖子中的红包卡片
-  // 使用 afterAdopt: true 确保在 Ember 完成 DOM 渲染后执行
+  // decorateCookedElement 在每个 cooked 元素渲染时自动触发，无需额外监听
   api.decorateCookedElement(
     (elem) => {
       processRedEnvelopesInElement(elem);
@@ -26,21 +21,8 @@ export default apiInitializer("1.0", (api) => {
   );
 
   // 话题/帖子创建后绑定红包到话题
-  // Discourse 在帖子创建后触发多种事件，我们监听几个常见的
-  api.onAppEvent("topic:created", (post) => {
-    if (post) bindEnvelopesToTopic(post);
-  });
   api.onAppEvent("composer:created-post", (post) => {
     if (post) bindEnvelopesToTopic(post);
-  });
-  api.onAppEvent("post:created", (post) => {
-    if (post) bindEnvelopesToTopic(post);
-  });
-
-  // 备用方案：用 MutationObserver 监听 post-stream 容器
-  // 当 Ember 重新渲染 cooked 内容时，重新处理红包
-  api.onPageChange(() => {
-    scheduleRedEnvelopeProcessing();
   });
 });
 
