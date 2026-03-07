@@ -1,0 +1,12 @@
+plugins:
+  credit_enabled:
+    default: true
+    client: true
+  credit_frontend_url:
+    default: ""
+    client: true
+  credit_new_user_balance:
+    default: 100
+    min: 0
+    client: true
+    description: "新用户初始积分（唯一配置源）"
