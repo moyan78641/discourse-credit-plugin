@@ -38,13 +38,21 @@ html[data-color-scheme="dark"] {
 
 // ── 打赏按钮（帖子菜单） ──
 // 默认灰色无彩色，和未点赞按钮保持一致
-.post-action-menu__credit-tip {
+.post-action-menu__credit-tip.credit-tip-btn {
+  &.btn-flat {
+    .d-icon {
+      color: var(--primary-low-mid) !important;
+      transition: color 0.2s ease;
+    }
+  }
+
   .d-icon {
-    color: var(--primary-low-mid);
+    color: var(--primary-low-mid) !important;
     transition: color 0.2s ease;
   }
+
   &:hover .d-icon {
-    color: var(--credit-accent);
+    color: var(--credit-accent) !important;
   }
 }
 
@@ -63,51 +71,71 @@ html[data-color-scheme="dark"] {
     padding: 8px 14px;
     cursor: pointer;
     transition: background 0.15s;
-    &:hover { background: rgba(0,0,0,0.03); }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
   }
-  .tip-summary-icon { font-size: 0.9em; }
+
+  .tip-summary-icon {
+    font-size: 0.9em;
+  }
+
   .tip-summary-avatars {
     display: flex;
     align-items: center;
     gap: 2px;
   }
+
   .tip-preview-avatar {
     border-radius: 50%;
     vertical-align: middle;
   }
+
   .tip-preview-more {
     font-size: 0.78em;
     color: var(--primary-medium);
     margin-left: 4px;
   }
+
   .tip-summary-text {
     font-size: 0.85em;
     color: var(--primary-medium);
-    strong { color: var(--credit-accent); }
+
+    strong {
+      color: var(--credit-accent);
+    }
   }
 
   .tip-detail-panel {
     border-top: 1px solid var(--credit-card-border);
     padding: 10px 14px;
   }
+
   .tip-detail-header {
     font-size: 0.78em;
     font-weight: 600;
     color: var(--primary-medium);
     margin-bottom: 8px;
   }
+
   .tip-detail-row {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 4px 0;
   }
-  .tip-detail-avatar img { border-radius: 50%; }
+
+  .tip-detail-avatar img {
+    border-radius: 50%;
+  }
+
   .tip-detail-username {
     font-size: 0.85em;
     font-weight: 600;
     color: var(--primary-high);
   }
+
   .tip-detail-amount {
     margin-left: auto;
     font-size: 0.82em;
@@ -151,7 +179,9 @@ html[data-color-scheme="dark"] {
   font-size: 0.95em;
 }
 
-.credit-back-btn { margin-bottom: 16px; }
+.credit-back-btn {
+  margin-bottom: 16px;
+}
 
 // ── 卡片基础 ──
 .credit-card {
@@ -169,11 +199,15 @@ html[data-color-scheme="dark"] {
   border-radius: var(--credit-radius);
   padding: 20px;
   margin: 12px 0;
-  &.compact { padding: 14px; }
+
+  &.compact {
+    padding: 14px;
+  }
 }
 
 .form-row {
   margin-bottom: 14px;
+
   label {
     display: block;
     font-weight: 600;
@@ -182,7 +216,10 @@ html[data-color-scheme="dark"] {
     color: var(--primary-high);
     letter-spacing: 0.02em;
   }
-  input, select, textarea {
+
+  input,
+  select,
+  textarea {
     width: 100%;
     max-width: 500px;
     padding: 10px 14px;
@@ -191,13 +228,18 @@ html[data-color-scheme="dark"] {
     background: var(--secondary);
     font-size: 0.95em;
     transition: border-color 0.2s, box-shadow 0.2s;
+
     &:focus {
       outline: none;
       border-color: var(--credit-accent);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
   }
-  textarea { min-height: 80px; resize: vertical; }
+
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
 }
 
 // ── PIN 密码输入 ──
@@ -246,6 +288,7 @@ input[type="password"]#re-pay-key {
   border: 2px solid var(--credit-card-border);
   border-radius: 10px;
   transition: border-color 0.2s, box-shadow 0.2s;
+
   &:focus {
     border-color: var(--credit-accent);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
@@ -268,7 +311,10 @@ input[type="password"]#re-pay-key {
 // ── 弹窗系统 ──
 .credit-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -305,7 +351,10 @@ input[type="password"]#re-pay-key {
   box-shadow: var(--credit-shadow-lg);
   animation: credit-slide-up 0.25s ease;
 
-  h3 { margin: 0 0 12px; font-weight: 700; }
+  h3 {
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
 }
 
 .credit-modal-actions {
@@ -318,13 +367,25 @@ input[type="password"]#re-pay-key {
 }
 
 @keyframes credit-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes credit-slide-up {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 // ========================================
@@ -335,7 +396,7 @@ input[type="password"]#re-pay-key {
   margin: 0 auto;
   padding: 20px;
 
-  > h2 {
+  >h2 {
     font-size: 1.3em;
     font-weight: 700;
     margin-bottom: 20px;
@@ -359,7 +420,9 @@ input[type="password"]#re-pay-key {
   &::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 4px;
     background: linear-gradient(90deg, var(--credit-accent), var(--credit-green));
   }
@@ -430,6 +493,7 @@ input[type="password"]#re-pay-key {
       text-align: center;
       padding: 8px;
     }
+
     .stat-label {
       font-size: 0.72em;
       color: var(--primary-medium);
@@ -439,6 +503,7 @@ input[type="password"]#re-pay-key {
       letter-spacing: 0.05em;
       font-weight: 500;
     }
+
     .stat-value {
       font-size: 1.15em;
       font-weight: 700;
@@ -481,7 +546,11 @@ input[type="password"]#re-pay-key {
     font-size: 2.5em;
     color: var(--credit-accent);
     margin-bottom: 16px;
-    .d-icon { width: 1em; height: 1em; }
+
+    .d-icon {
+      width: 1em;
+      height: 1em;
+    }
   }
 
   h3 {
@@ -538,6 +607,7 @@ input[type="password"]#re-pay-key {
     font-size: 0.88em;
     cursor: pointer;
     transition: border-color 0.2s;
+
     &:focus {
       border-color: var(--credit-accent);
       outline: none;
@@ -561,27 +631,43 @@ input[type="password"]#re-pay-key {
     cursor: pointer;
     transition: background 0.15s;
 
-    &:hover { background: var(--credit-card-bg); }
-    &:last-child { border-bottom: none; }
+    &:hover {
+      background: var(--credit-card-bg);
+    }
 
-    .order-info { flex: 1; }
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .order-info {
+      flex: 1;
+    }
+
     .order-name {
       display: block;
       font-weight: 600;
       font-size: 0.95em;
       margin-bottom: 2px;
     }
+
     .order-meta {
       font-size: 0.78em;
       color: var(--primary-medium);
     }
+
     .order-amount {
       font-weight: 700;
       font-size: 1.1em;
       font-variant-numeric: tabular-nums;
     }
-    &.income .order-amount { color: var(--credit-green); }
-    &.expense .order-amount { color: var(--credit-red); }
+
+    &.income .order-amount {
+      color: var(--credit-green);
+    }
+
+    &.expense .order-amount {
+      color: var(--credit-red);
+    }
   }
 }
 
@@ -612,6 +698,7 @@ input[type="password"]#re-pay-key {
         margin: 0 0 6px;
         color: var(--primary-medium);
       }
+
       .receipt-time {
         font-size: 0.75em;
         color: var(--primary-low-mid);
@@ -633,6 +720,7 @@ input[type="password"]#re-pay-key {
         margin-bottom: 6px;
         font-weight: 500;
       }
+
       .receipt-amount-value {
         font-size: 2.5em;
         font-weight: 800;
@@ -653,19 +741,32 @@ input[type="password"]#re-pay-key {
       align-items: center;
       padding: 7px 0;
       border-bottom: 1px solid var(--credit-card-border);
-      &:last-child { border-bottom: none; }
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       .receipt-label {
         font-size: 0.78em;
         color: var(--primary-medium);
         font-weight: 500;
       }
+
       .receipt-value {
         font-size: 0.85em;
         font-weight: 600;
-        &.mono { font-family: monospace; font-size: 0.8em; }
-        &.highlight { color: var(--credit-accent); font-weight: 700; }
+
+        &.mono {
+          font-family: monospace;
+          font-size: 0.8em;
+        }
+
+        &.highlight {
+          color: var(--credit-accent);
+          font-weight: 700;
+        }
       }
+
       &.fee-row {
         background: var(--credit-card-bg);
         padding: 7px 10px;
@@ -685,7 +786,7 @@ input[type="password"]#re-pay-key {
     }
   }
 
-  > .btn {
+  >.btn {
     margin: 0 28px 20px;
     border-radius: var(--credit-radius-sm);
   }
@@ -721,7 +822,9 @@ input[type="password"]#re-pay-key {
     opacity: 0.75;
   }
 
-  &:hover { box-shadow: var(--credit-shadow-md); }
+  &:hover {
+    box-shadow: var(--credit-shadow-md);
+  }
 
   .product-card-header {
     display: flex;
@@ -730,12 +833,28 @@ input[type="password"]#re-pay-key {
     cursor: pointer;
     padding: 16px 18px;
     transition: background 0.15s;
-    &:hover { background: var(--credit-card-bg); }
+
+    &:hover {
+      background: var(--credit-card-bg);
+    }
   }
 
-  .product-card-left { flex: 1; }
-  .product-card-right { display: flex; align-items: center; gap: 8px; }
-  .product-card-name { font-weight: 700; font-size: 1em; display: block; }
+  .product-card-left {
+    flex: 1;
+  }
+
+  .product-card-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .product-card-name {
+    font-weight: 700;
+    font-size: 1em;
+    display: block;
+  }
+
   .product-card-price {
     font-size: 0.85em;
     color: var(--credit-accent);
@@ -756,33 +875,62 @@ input[type="password"]#re-pay-key {
     padding: 3px 10px;
     border-radius: 20px;
     font-weight: 600;
-    &.active { background: var(--credit-green-light); color: var(--credit-green); }
-    &.inactive { background: var(--credit-red-light); color: var(--credit-red); }
+
+    &.active {
+      background: var(--credit-green-light);
+      color: var(--credit-green);
+    }
+
+    &.inactive {
+      background: var(--credit-red-light);
+      color: var(--credit-red);
+    }
   }
 
-  .product-card-detail { padding: 0 18px 18px; }
+  .product-card-detail {
+    padding: 0 18px 18px;
+  }
 
   .product-info-grid {
     margin-bottom: 14px;
+
     .info-row {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 8px 0;
       border-bottom: 1px solid var(--credit-card-border);
-      &:last-child { border-bottom: none; }
+
+      &:last-child {
+        border-bottom: none;
+      }
     }
+
     .info-label {
       font-weight: 600;
       min-width: 80px;
       font-size: 0.85em;
       color: var(--primary-medium);
     }
-    .info-value { font-size: 0.9em; flex: 1; word-break: break-all; }
+
+    .info-value {
+      font-size: 0.9em;
+      flex: 1;
+      word-break: break-all;
+    }
   }
 
-  .product-actions { display: flex; gap: 8px; margin-bottom: 16px; }
-  .form-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .product-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
 }
 
 // Card keys
@@ -790,11 +938,16 @@ input[type="password"]#re-pay-key {
   border-top: 1px solid var(--credit-card-border);
   padding-top: 14px;
   margin-top: 14px;
-  h4 { margin: 0 0 10px; font-size: 0.95em; }
+
+  h4 {
+    margin: 0 0 10px;
+    font-size: 0.95em;
+  }
 }
 
 .card-keys-list {
   margin-top: 8px;
+
   .card-key-row {
     display: flex;
     justify-content: space-between;
@@ -803,16 +956,33 @@ input[type="password"]#re-pay-key {
     border-bottom: 1px solid var(--credit-card-border);
     font-size: 0.85em;
     gap: 8px;
-    &.sold { opacity: 0.4; }
-    .card-key-value { font-family: monospace; word-break: break-all; flex: 1; }
-    .card-key-status { font-weight: 600; margin-left: 8px; }
+
+    &.sold {
+      opacity: 0.4;
+    }
+
+    .card-key-value {
+      font-family: monospace;
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .card-key-status {
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
     .card-key-edit-input {
       flex: 1;
       padding: 5px 10px;
       border: 1.5px solid var(--credit-card-border);
       border-radius: 6px;
       font-family: monospace;
-      &:focus { border-color: var(--credit-accent); outline: none; }
+
+      &:focus {
+        border-color: var(--credit-accent);
+        outline: none;
+      }
     }
   }
 }
@@ -826,11 +996,33 @@ input[type="password"]#re-pay-key {
   padding: 14px;
   border-bottom: 1px solid var(--credit-card-border);
 
-  .order-info { flex: 1; min-width: 150px; }
-  .order-name { display: block; font-weight: 600; }
-  .order-meta { font-size: 0.78em; color: var(--primary-medium); display: block; }
-  .order-amount { font-weight: 700; font-size: 1.05em; color: var(--credit-accent); white-space: nowrap; }
-  .order-delivery-status { min-width: 60px; text-align: center; }
+  .order-info {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .order-name {
+    display: block;
+    font-weight: 600;
+  }
+
+  .order-meta {
+    font-size: 0.78em;
+    color: var(--primary-medium);
+    display: block;
+  }
+
+  .order-amount {
+    font-weight: 700;
+    font-size: 1.05em;
+    color: var(--credit-accent);
+    white-space: nowrap;
+  }
+
+  .order-delivery-status {
+    min-width: 60px;
+    text-align: center;
+  }
 }
 
 // ========================================
@@ -849,12 +1041,17 @@ input[type="password"]#re-pay-key {
   padding: 28px;
   box-shadow: var(--credit-shadow-md);
 
-  h2 { margin: 0 0 8px; font-weight: 700; }
+  h2 {
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+
   .product-detail-meta {
     color: var(--primary-medium);
     margin-bottom: 16px;
     font-size: 0.88em;
   }
+
   .product-description {
     margin-bottom: 20px;
     line-height: 1.6;
@@ -866,17 +1063,23 @@ input[type="password"]#re-pay-key {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+
   td {
     padding: 12px 14px;
     border-bottom: 1px solid var(--credit-card-border);
   }
+
   .pd-label {
     font-weight: 600;
     color: var(--primary-medium);
     width: 100px;
     font-size: 0.85em;
   }
-  .pd-value { font-weight: 500; }
+
+  .pd-value {
+    font-weight: 500;
+  }
+
   .pd-price {
     color: var(--credit-accent);
     font-size: 1.3em;
@@ -893,7 +1096,9 @@ input[type="password"]#re-pay-key {
 // ========================================
 // 红包卡片
 // ========================================
-.credit-red-envelope-wrap { margin: 16px 0; }
+.credit-red-envelope-wrap {
+  margin: 16px 0;
+}
 
 .credit-re-card {
   background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
@@ -903,7 +1108,8 @@ input[type="password"]#re-pay-key {
   max-width: 400px;
   box-shadow: 0 4px 20px rgba(204, 0, 0, 0.25);
 
-  &.exhausted, &.claimed {
+  &.exhausted,
+  &.claimed {
     background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
@@ -913,11 +1119,19 @@ input[type="password"]#re-pay-key {
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    .re-card-icon { font-size: 1.3em; }
-    .re-card-title { font-weight: 700; font-size: 1em; }
+
+    .re-card-icon {
+      font-size: 1.3em;
+    }
+
+    .re-card-title {
+      font-weight: 700;
+      font-size: 1em;
+    }
+
     .re-reply-badge {
       font-size: 0.7em;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       padding: 3px 8px;
       border-radius: 12px;
       margin-left: auto;
@@ -936,21 +1150,31 @@ input[type="password"]#re-pay-key {
     display: flex;
     gap: 24px;
     margin-bottom: 12px;
+
     .re-stat {
-      .re-stat-label { font-size: 0.72em; opacity: 0.7; display: block; }
-      .re-stat-value { font-weight: 800; font-size: 1em; }
+      .re-stat-label {
+        font-size: 0.72em;
+        opacity: 0.7;
+        display: block;
+      }
+
+      .re-stat-value {
+        font-weight: 800;
+        font-size: 1em;
+      }
     }
   }
 
   .re-card-progress {
     height: 5px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 12px;
+
     .re-card-progress-bar {
       height: 100%;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255, 255, 255, 0.75);
       border-radius: 3px;
       transition: width 0.4s ease;
     }
@@ -961,7 +1185,11 @@ input[type="password"]#re-pay-key {
     text-align: center;
     padding: 8px 0;
     opacity: 0.9;
-    &.claimed { color: #ffd700; font-weight: 700; }
+
+    &.claimed {
+      color: #ffd700;
+      font-weight: 700;
+    }
   }
 
   .re-claim-btn {
@@ -969,30 +1197,43 @@ input[type="password"]#re-pay-key {
     width: 100%;
     margin-top: 10px;
     padding: 11px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.35);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 10px;
     font-weight: 700;
     font-size: 1em;
     cursor: pointer;
     transition: all 0.2s;
     backdrop-filter: blur(4px);
-    &:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
-    &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
   }
 
   .re-card-claims {
     margin-top: 14px;
-    border-top: 1px solid rgba(255,255,255,0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     padding-top: 10px;
+
     .re-claim-row {
       display: flex;
       justify-content: space-between;
       padding: 4px 0;
       font-size: 0.8em;
       opacity: 0.85;
-      .re-claim-amount { font-weight: 700; }
+
+      .re-claim-amount {
+        font-weight: 700;
+      }
     }
   }
 
@@ -1006,16 +1247,26 @@ input[type="password"]#re-pay-key {
 }
 
 // 红包 / 打赏弹窗表单
-.credit-re-modal-form, .credit-tip-modal-form {
+.credit-re-modal-form,
+.credit-tip-modal-form {
   .form-row {
     margin-bottom: 14px;
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85em; }
-    input, select {
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.85em;
+    }
+
+    input,
+    select {
       width: 100%;
       padding: 10px 14px;
       border: 1.5px solid var(--credit-card-border);
       border-radius: var(--credit-radius-sm);
       transition: border-color 0.2s, box-shadow 0.2s;
+
       &:focus {
         border-color: var(--credit-accent);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -1023,8 +1274,12 @@ input[type="password"]#re-pay-key {
       }
     }
   }
+
   .re-conditions {
-    display: flex; gap: 16px; flex-wrap: wrap;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+
     label {
       display: inline-flex;
       align-items: center;
@@ -1033,14 +1288,23 @@ input[type="password"]#re-pay-key {
       cursor: pointer;
       font-size: 0.9em;
     }
-    input[type="checkbox"] { width: auto; }
+
+    input[type="checkbox"] {
+      width: auto;
+    }
   }
 }
 
 // ── 打赏按钮 ──
 .credit-tip-btn {
-  .d-icon { color: var(--love); transition: transform 0.15s; }
-  &:hover .d-icon { transform: scale(1.15); }
+  .d-icon {
+    color: var(--love);
+    transition: transform 0.15s;
+  }
+
+  &:hover .d-icon {
+    transform: scale(1.15);
+  }
 }
 
 // ── 帖子打赏信息 ──
@@ -1058,6 +1322,7 @@ input[type="password"]#re-pay-key {
     border: 1px solid var(--credit-card-border);
     transition: all 0.15s;
     user-select: none;
+
     &:hover {
       background: var(--secondary);
       box-shadow: var(--credit-shadow-sm);
@@ -1065,16 +1330,25 @@ input[type="password"]#re-pay-key {
     }
   }
 
-  .tip-summary-icon { font-size: 0.95em; line-height: 1; }
+  .tip-summary-icon {
+    font-size: 0.95em;
+    line-height: 1;
+  }
+
   .tip-summary-avatars {
     display: flex;
     align-items: center;
+
     .tip-preview-avatar {
       border-radius: 50%;
       margin-left: -4px;
       border: 2px solid var(--secondary);
-      &:first-child { margin-left: 0; }
+
+      &:first-child {
+        margin-left: 0;
+      }
     }
+
     .tip-preview-more {
       font-size: 0.72em;
       color: var(--primary-medium);
@@ -1082,10 +1356,15 @@ input[type="password"]#re-pay-key {
       font-weight: 600;
     }
   }
+
   .tip-summary-text {
     font-size: 0.82em;
     color: var(--primary-medium);
-    strong { color: var(--credit-accent); font-weight: 700; }
+
+    strong {
+      color: var(--credit-accent);
+      font-weight: 700;
+    }
   }
 
   .tip-detail-panel {
@@ -1098,6 +1377,7 @@ input[type="password"]#re-pay-key {
     max-width: 320px;
     animation: credit-slide-up 0.2s ease;
   }
+
   .tip-detail-header {
     font-size: 0.78em;
     color: var(--primary-medium);
@@ -1106,26 +1386,40 @@ input[type="password"]#re-pay-key {
     margin-bottom: 4px;
     border-bottom: 1px solid var(--credit-card-border);
   }
+
   .tip-detail-row {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 0;
     border-bottom: 1px solid var(--credit-card-bg);
-    &:last-child { border-bottom: none; }
+
+    &:last-child {
+      border-bottom: none;
+    }
   }
+
   .tip-detail-avatar {
     flex-shrink: 0;
-    img { border-radius: 50%; display: block; }
+
+    img {
+      border-radius: 50%;
+      display: block;
+    }
   }
+
   .tip-detail-username {
     flex: 1;
     font-size: 0.85em;
     font-weight: 600;
     color: var(--primary);
     text-decoration: none;
-    &:hover { color: var(--credit-accent); }
+
+    &:hover {
+      color: var(--credit-accent);
+    }
   }
+
   .tip-detail-amount {
     font-size: 0.85em;
     font-weight: 700;
@@ -1139,7 +1433,9 @@ input[type="password"]#re-pay-key {
   }
 }
 
-.credit-profile-tip-btn { margin-left: 8px; }
+.credit-profile-tip-btn {
+  margin-left: 8px;
+}
 
 // ========================================
 // 管理页
@@ -1152,8 +1448,17 @@ input[type="password"]#re-pay-key {
 
 .admin-section-header {
   margin-bottom: 16px;
-  h3 { margin: 0 0 4px; font-weight: 700; }
-  .section-desc { color: var(--primary-medium); font-size: 0.85em; margin: 0; }
+
+  h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+
+  .section-desc {
+    color: var(--primary-medium);
+    font-size: 0.85em;
+    margin: 0;
+  }
 }
 
 .admin-stats-grid {
@@ -1171,14 +1476,23 @@ input[type="password"]#re-pay-key {
   text-align: center;
   box-shadow: var(--credit-shadow-sm);
   transition: box-shadow 0.2s, transform 0.2s;
-  &:hover { box-shadow: var(--credit-shadow-md); transform: translateY(-2px); }
+
+  &:hover {
+    box-shadow: var(--credit-shadow-md);
+    transform: translateY(-2px);
+  }
 
   .stat-icon {
     font-size: 1.5em;
     color: var(--credit-accent);
     margin-bottom: 10px;
-    .d-icon { width: 1em; height: 1em; }
+
+    .d-icon {
+      width: 1em;
+      height: 1em;
+    }
   }
+
   .stat-label {
     font-size: 0.78em;
     color: var(--primary-medium);
@@ -1188,6 +1502,7 @@ input[type="password"]#re-pay-key {
     letter-spacing: 0.05em;
     font-weight: 500;
   }
+
   .stat-value {
     font-size: 1.8em;
     font-weight: 800;
@@ -1222,16 +1537,31 @@ input[type="password"]#re-pay-key {
     padding: 12px 18px;
     align-items: center;
     border-bottom: 1px solid var(--credit-card-border);
-    &:last-child { border-bottom: none; }
-    &.editing { background: var(--credit-accent-light); }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.editing {
+      background: var(--credit-accent-light);
+    }
+
     input {
       padding: 6px 10px;
       border-radius: 6px;
       border: 1.5px solid var(--credit-card-border);
       width: 100%;
-      &:focus { border-color: var(--credit-accent); outline: none; }
+
+      &:focus {
+        border-color: var(--credit-accent);
+        outline: none;
+      }
     }
-    .row-actions { display: flex; gap: 4px; }
+
+    .row-actions {
+      display: flex;
+      gap: 4px;
+    }
   }
 
   .pay-level-badge {
@@ -1240,10 +1570,27 @@ input[type="password"]#re-pay-key {
     border-radius: 20px;
     font-size: 0.78em;
     font-weight: 700;
-    &.level-0 { background: var(--credit-card-bg); color: var(--primary-high); border: 1px solid var(--credit-card-border); }
-    &.level-1 { background: #fef3c7; color: #92400e; }
-    &.level-2 { background: #e0e7ff; color: #3730a3; }
-    &.level-3 { background: #1f2937; color: #f9fafb; }
+
+    &.level-0 {
+      background: var(--credit-card-bg);
+      color: var(--primary-high);
+      border: 1px solid var(--credit-card-border);
+    }
+
+    &.level-1 {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    &.level-2 {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    &.level-3 {
+      background: #1f2937;
+      color: #f9fafb;
+    }
   }
 }
 
@@ -1260,9 +1607,17 @@ input[type="password"]#re-pay-key {
     gap: 12px;
     padding: 10px 0;
     border-bottom: 1px solid var(--credit-card-border);
-    &:last-child { border-bottom: none; }
+
+    &:last-child {
+      border-bottom: none;
+    }
   }
-  .fee-label { font-weight: 700; min-width: 120px; }
+
+  .fee-label {
+    font-weight: 700;
+    min-width: 120px;
+  }
+
   .fee-key {
     font-family: monospace;
     background: var(--credit-card-bg);
@@ -1271,7 +1626,12 @@ input[type="password"]#re-pay-key {
     font-size: 0.82em;
     border: 1px solid var(--credit-card-border);
   }
-  .fee-desc { color: var(--primary-medium); font-size: 0.85em; flex: 1; }
+
+  .fee-desc {
+    color: var(--primary-medium);
+    font-size: 0.85em;
+    flex: 1;
+  }
 }
 
 .admin-configs-list {
@@ -1282,6 +1642,7 @@ input[type="password"]#re-pay-key {
     padding: 10px 0;
     border-bottom: 1px solid var(--credit-card-border);
     flex-wrap: wrap;
+
     .config-key {
       font-weight: 700;
       min-width: 200px;
@@ -1289,9 +1650,21 @@ input[type="password"]#re-pay-key {
       font-family: monospace;
       color: var(--primary-high);
     }
-    .config-desc { color: var(--primary-medium); font-size: 0.78em; flex: 1; }
-    .config-value { font-weight: 600; }
-    input { max-width: 200px; padding: 6px 10px; }
+
+    .config-desc {
+      color: var(--primary-medium);
+      font-size: 0.78em;
+      flex: 1;
+    }
+
+    .config-value {
+      font-weight: 600;
+    }
+
+    input {
+      max-width: 200px;
+      padding: 6px 10px;
+    }
   }
 }
 
@@ -1299,12 +1672,17 @@ input[type="password"]#re-pay-key {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
+
   input {
     max-width: 300px;
     padding: 8px 14px;
     border-radius: var(--credit-radius-sm);
     border: 1.5px solid var(--credit-card-border);
-    &:focus { border-color: var(--credit-accent); outline: none; }
+
+    &:focus {
+      border-color: var(--credit-accent);
+      outline: none;
+    }
   }
 }
 
@@ -1316,8 +1694,16 @@ input[type="password"]#re-pay-key {
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    .user-info { flex: 1; min-width: 150px; }
-    .user-name { font-weight: 700; }
+
+    .user-info {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .user-name {
+      font-weight: 700;
+    }
+
     .admin-badge {
       background: var(--credit-red-light);
       color: var(--credit-red);
@@ -1327,15 +1713,27 @@ input[type="password"]#re-pay-key {
       font-weight: 600;
       margin-left: 6px;
     }
-    .user-balance { color: var(--credit-accent); font-weight: 600; }
-    .user-actions { display: flex; gap: 6px; }
+
+    .user-balance {
+      color: var(--credit-accent);
+      font-weight: 600;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 6px;
+    }
   }
+
   .balance-form {
     display: flex;
     gap: 8px;
     width: 100%;
     margin-top: 8px;
-    input { max-width: 200px; }
+
+    input {
+      max-width: 200px;
+    }
   }
 }
 
@@ -1365,6 +1763,7 @@ input[type="password"]#re-pay-key {
 
 .payment-amount-display {
   margin: 24px 0;
+
   .payment-amount-label {
     display: block;
     font-size: 0.82em;
@@ -1374,12 +1773,17 @@ input[type="password"]#re-pay-key {
     letter-spacing: 0.05em;
     font-weight: 500;
   }
+
   .payment-amount-value {
     font-size: 2.4em;
     font-weight: 800;
     color: var(--primary);
     letter-spacing: -0.02em;
-    small { font-size: 0.4em; color: var(--primary-medium); }
+
+    small {
+      font-size: 0.4em;
+      color: var(--primary-medium);
+    }
   }
 }
 
@@ -1395,13 +1799,20 @@ input[type="password"]#re-pay-key {
   justify-content: space-between;
   padding: 8px 0;
   font-size: 0.9em;
-  &.fee { color: var(--primary-medium); font-size: 0.82em; }
+
+  &.fee {
+    color: var(--primary-medium);
+    font-size: 0.82em;
+  }
 }
 
 .payment-pay-form {
   margin-top: 24px;
   text-align: left;
-  .form-row { text-align: left; }
+
+  .form-row {
+    text-align: left;
+  }
 }
 
 .payment-confirm-btn {
@@ -1415,10 +1826,15 @@ input[type="password"]#re-pay-key {
 
 .payment-login-hint {
   margin-top: 24px;
-  p { color: var(--primary-medium); margin-bottom: 12px; }
+
+  p {
+    color: var(--primary-medium);
+    margin-bottom: 12px;
+  }
 }
 
-.payment-success-card, .payment-error-card {
+.payment-success-card,
+.payment-error-card {
   text-align: center;
   padding: 44px 28px;
   background: var(--secondary);
@@ -1427,26 +1843,56 @@ input[type="password"]#re-pay-key {
   box-shadow: var(--credit-shadow-md);
 }
 
-.success-icon { font-size: 3em; color: var(--credit-green); margin-bottom: 16px; }
-.error-icon { font-size: 3em; color: var(--credit-red); margin-bottom: 16px; }
-.amount-highlight { font-weight: 800; font-size: 1.2em; }
-.payment-desc { color: var(--primary-medium); font-size: 0.9em; }
-.redirect-hint { color: var(--primary-medium); font-size: 0.82em; margin: 14px 0; }
+.success-icon {
+  font-size: 3em;
+  color: var(--credit-green);
+  margin-bottom: 16px;
+}
+
+.error-icon {
+  font-size: 3em;
+  color: var(--credit-red);
+  margin-bottom: 16px;
+}
+
+.amount-highlight {
+  font-weight: 800;
+  font-size: 1.2em;
+}
+
+.payment-desc {
+  color: var(--primary-medium);
+  font-size: 0.9em;
+}
+
+.redirect-hint {
+  color: var(--primary-medium);
+  font-size: 0.82em;
+  margin: 14px 0;
+}
 
 // ========================================
 // 应用管理页
 // ========================================
-.credit-apps-page { max-width: 800px; }
+.credit-apps-page {
+  max-width: 800px;
+}
 
 .apps-intro {
   color: var(--primary-medium);
   font-size: 0.9em;
   margin-bottom: 16px;
   line-height: 1.5;
-  a { color: var(--credit-accent); font-weight: 500; }
+
+  a {
+    color: var(--credit-accent);
+    font-weight: 500;
+  }
 }
 
-.credit-apps-list { margin-top: 16px; }
+.credit-apps-list {
+  margin-top: 16px;
+}
 
 .app-card {
   background: var(--secondary);
@@ -1456,8 +1902,14 @@ input[type="password"]#re-pay-key {
   overflow: hidden;
   box-shadow: var(--credit-shadow-sm);
   transition: box-shadow 0.2s;
-  &:hover { box-shadow: var(--credit-shadow-md); }
-  &.inactive { opacity: 0.65; }
+
+  &:hover {
+    box-shadow: var(--credit-shadow-md);
+  }
+
+  &.inactive {
+    opacity: 0.65;
+  }
 }
 
 .app-card-header {
@@ -1467,25 +1919,56 @@ input[type="password"]#re-pay-key {
   padding: 14px 18px;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: var(--credit-card-bg); }
+
+  &:hover {
+    background: var(--credit-card-bg);
+  }
 }
 
-.app-card-left { display: flex; align-items: center; gap: 10px; }
-.app-card-name { font-weight: 700; }
+.app-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-card-name {
+  font-weight: 700;
+}
 
 .app-status-badge {
   font-size: 0.72em;
   padding: 3px 10px;
   border-radius: 20px;
   font-weight: 600;
-  &.active { background: var(--credit-green-light); color: var(--credit-green); }
-  &.inactive { background: var(--credit-red-light); color: var(--credit-red); }
-  &.test { background: var(--credit-orange-light); color: var(--credit-orange); }
+
+  &.active {
+    background: var(--credit-green-light);
+    color: var(--credit-green);
+  }
+
+  &.inactive {
+    background: var(--credit-red-light);
+    color: var(--credit-red);
+  }
+
+  &.test {
+    background: var(--credit-orange-light);
+    color: var(--credit-orange);
+  }
 }
 
-.app-card-date { font-size: 0.78em; color: var(--primary-medium); }
-.app-card-detail { padding: 0 18px 18px; }
-.app-credentials { margin-bottom: 14px; }
+.app-card-date {
+  font-size: 0.78em;
+  color: var(--primary-medium);
+}
+
+.app-card-detail {
+  padding: 0 18px 18px;
+}
+
+.app-credentials {
+  margin-bottom: 14px;
+}
 
 .credential-row {
   display: flex;
@@ -1507,10 +1990,17 @@ input[type="password"]#re-pay-key {
   font-family: monospace;
   font-size: 0.82em;
   word-break: break-all;
-  &.token { color: var(--credit-red); }
+
+  &.token {
+    color: var(--credit-red);
+  }
 }
 
-.app-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.app-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 
 // ── 测试支付 ──
 .payment-test-badge {
@@ -1533,14 +2023,22 @@ input[type="password"]#re-pay-key {
 
 .test-result-card {
   text-align: center;
+
   .test-success-text {
     color: var(--credit-green);
     font-weight: 700;
     font-size: 1.1em;
     margin-bottom: 14px;
   }
-  .credential-row { justify-content: center; margin-bottom: 12px; }
-  .btn { margin: 4px; }
+
+  .credential-row {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .btn {
+    margin: 4px;
+  }
 }
 
 // ========================================
@@ -1556,15 +2054,37 @@ input[type="password"]#re-pay-key {
 // 响应式
 // ========================================
 @media (max-width: 600px) {
-  .credit-wallet-card .wallet-stats { grid-template-columns: repeat(2, 1fr); }
-  .admin-stats-grid { grid-template-columns: 1fr; }
-  .product-detail-table { font-size: 0.88em; }
-  .credit-pin-digit { width: 38px; height: 46px; font-size: 1.2em; }
-  .credit-wallet-card { padding: 20px; }
-  .credit-modal { padding: 20px; max-width: 340px; }
+  .credit-wallet-card .wallet-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-detail-table {
+    font-size: 0.88em;
+  }
+
+  .credit-pin-digit {
+    width: 38px;
+    height: 46px;
+    font-size: 1.2em;
+  }
+
+  .credit-wallet-card {
+    padding: 20px;
+  }
+
+  .credit-modal {
+    padding: 20px;
+    max-width: 340px;
+  }
 
   .admin-pay-configs {
-    .pay-config-header, .pay-config-row {
+
+    .pay-config-header,
+    .pay-config-row {
       grid-template-columns: 1fr;
       gap: 4px;
     }
