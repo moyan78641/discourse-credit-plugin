@@ -36,6 +36,86 @@ html[data-color-scheme="dark"] {
   --credit-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
+// ── 打赏按钮（帖子菜单） ──
+// 默认灰色无彩色，和未点赞按钮保持一致
+.post-action-menu__credit-tip {
+  .d-icon {
+    color: var(--primary-low-mid);
+    transition: color 0.2s ease;
+  }
+  &:hover .d-icon {
+    color: var(--credit-accent);
+  }
+}
+
+// ── 帖子打赏信息面板 ──
+.credit-tip-info {
+  margin: 12px 0 4px;
+  border-radius: var(--credit-radius-sm);
+  background: var(--credit-card-bg);
+  border: 1px solid var(--credit-card-border);
+  overflow: hidden;
+
+  .tip-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover { background: rgba(0,0,0,0.03); }
+  }
+  .tip-summary-icon { font-size: 0.9em; }
+  .tip-summary-avatars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .tip-preview-avatar {
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+  .tip-preview-more {
+    font-size: 0.78em;
+    color: var(--primary-medium);
+    margin-left: 4px;
+  }
+  .tip-summary-text {
+    font-size: 0.85em;
+    color: var(--primary-medium);
+    strong { color: var(--credit-accent); }
+  }
+
+  .tip-detail-panel {
+    border-top: 1px solid var(--credit-card-border);
+    padding: 10px 14px;
+  }
+  .tip-detail-header {
+    font-size: 0.78em;
+    font-weight: 600;
+    color: var(--primary-medium);
+    margin-bottom: 8px;
+  }
+  .tip-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .tip-detail-avatar img { border-radius: 50%; }
+  .tip-detail-username {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--primary-high);
+  }
+  .tip-detail-amount {
+    margin-left: auto;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--credit-accent);
+  }
+}
+
 // ── 公共组件 ──
 .credit-error {
   background: var(--credit-red-light);

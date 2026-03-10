@@ -7,7 +7,13 @@ export default apiInitializer("1.34.0", (api) => {
     api.registerValueTransformer(
         "post-menu-buttons",
         ({ value: dag, context: { post, firstButtonKey } }) => {
-            if (post.user_id === api.getCurrentUser()?.id) return;
+            // 未登录用户不显示打赏按钮
+            const currentUser = api.getCurrentUser();
+            if (!currentUser) return;
+            // 不能打赏自己
+            if (post.user_id === currentUser.id) return;
+            // 私信中不显示打赏按钮
+            if (post.topic?.archetype === "private_message") return;
             dag.add("credit-tip", CreditTipButton, {
                 before: firstButtonKey,
             });
