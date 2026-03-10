@@ -98,6 +98,9 @@ async function doTip(targetUserId, postId, tipType, overlay) {
     }
     if (btn) { btn.textContent = "完成"; }
 
+    // 播放金币飘散动画
+    showTipCelebration(postId);
+
     // 刷新帖子的打赏信息
     if (window.__creditRefreshTipInfo) {
       window.__creditRefreshTipInfo(postId);
@@ -108,6 +111,38 @@ async function doTip(targetUserId, postId, tipType, overlay) {
     const msg = e.jqXHR?.responseJSON?.error || "打赏失败";
     if (errorEl) { errorEl.textContent = msg; errorEl.style.display = "block"; }
     if (btn) { btn.disabled = false; btn.textContent = "确认打赏"; }
+  }
+}
+
+// 金币飘散庆祝动画
+function showTipCelebration(postId) {
+  const article = document.querySelector(`article[data-post-id="${postId}"]`);
+  if (!article) return;
+
+  const tipBtn = article.querySelector(".post-action-menu__credit-tip");
+  const rect = tipBtn ? tipBtn.getBoundingClientRect() : article.getBoundingClientRect();
+
+  const emojis = ["💰", "🪙", "✨", "💎", "⭐"];
+  const count = 10;
+
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement("div");
+    particle.className = "credit-tip-particle";
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+    // 从按钮位置出发
+    particle.style.left = `${rect.left + rect.width / 2 + (Math.random() - 0.5) * 20}px`;
+    particle.style.top = `${rect.top + window.scrollY}px`;
+
+    // 随机飘散方向
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 80;
+    particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty("--ty", `${-Math.abs(Math.sin(angle) * distance) - 20}px`);
+    particle.style.animationDelay = `${Math.random() * 0.2}s`;
+
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 1500);
   }
 }
 

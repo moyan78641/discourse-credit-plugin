@@ -83,6 +83,12 @@ module ::DiscourseCredit
         # 累积发起者的 pay_score
         accumulate_pay_score!(wallet, total_deduct)
 
+        # 打赏成功后 bump 话题（类似收到新回复的效果）
+        if post_id.present?
+          tipped_post = Post.find_by(id: post_id.to_i)
+          tipped_post&.topic&.update(bumped_at: Time.current) if tipped_post&.topic
+        end
+
         render json: {
           success: true,
           order_no: order.order_no,

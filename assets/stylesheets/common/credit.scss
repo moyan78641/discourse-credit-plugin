@@ -63,6 +63,32 @@ article[data-user-tipped="1"] .post-action-menu__credit-tip.credit-tip-btn {
   }
 }
 
+// ── 打赏成功金币飘散动画 ──
+.credit-tip-particle {
+  position: absolute;
+  font-size: 1.2em;
+  pointer-events: none;
+  z-index: 10000;
+  animation: credit-tip-float 1.2s ease-out forwards;
+}
+
+@keyframes credit-tip-float {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(var(--tx, 0), var(--ty, -60px)) scale(1.2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0), calc(var(--ty, -60px) - 30px)) scale(0.6);
+  }
+}
+
 // ── 帖子打赏信息面板 ──
 .credit-tip-info {
   margin: 12px 0 4px;
