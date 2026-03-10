@@ -56,6 +56,13 @@ html[data-color-scheme="dark"] {
   }
 }
 
+// 已打赏状态：按钮图标变为主题色（类似点赞后红心的效果）
+article[data-user-tipped="1"] .post-action-menu__credit-tip.credit-tip-btn {
+  .d-icon {
+    color: var(--credit-accent) !important;
+  }
+}
+
 // ── 帖子打赏信息面板 ──
 .credit-tip-info {
   margin: 12px 0 4px;

@@ -80,13 +80,18 @@ async function batchLoadTips() {
         // 单次批量请求获取所有帖子的打赏信息
         const data = await ajax(`/credit/tip/posts.json?${postIds.map((id) => `post_ids[]=${id}`).join("&")}`);
 
-        // 渲染每个帖子的打赏信息
-        for (const [postId, tipData] of Object.entries(data)) {
+        // 标记当前用户的打赏状态 + 渲染打赏信息
+        for (const id of postIds) {
+            const article = document.querySelector(`article[data-post-id="${id}"]`);
+            if (!article) continue;
+            const tipData = data[id];
+            if (tipData && tipData.current_user_tipped) {
+                article.dataset.userTipped = "1";
+            }
             if (!tipData || tipData.count === 0) continue;
-            const article = document.querySelector(`article[data-post-id="${postId}"]`);
-            if (!article || article.querySelector(".credit-tip-info")) continue;
+            if (article.querySelector(".credit-tip-info")) continue;
             const cooked = article.querySelector(".cooked");
-            if (cooked) renderTipInfo(tipData, cooked, postId);
+            if (cooked) renderTipInfo(tipData, cooked, id);
         }
     } catch {
         // 忽略错误
@@ -162,6 +167,8 @@ window.__creditRefreshTipInfo = async function (postId) {
     if (oldInfo) oldInfo.remove();
     // 清除已加载标记，允许重新加载
     delete article.dataset.tipLoaded;
+    // 打赏成功后标记当前用户已打赏
+    article.dataset.userTipped = "1";
 
     try {
         const data = await ajax(`/credit/tip/post/${postId}.json`);

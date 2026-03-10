@@ -130,6 +130,13 @@ module ::DiscourseCredit
       user_ids = tips.map(&:payer_user_id).uniq
       users = User.where(id: user_ids).index_by(&:id)
 
+      # 当前用户已打赏的帖子 ID 集合
+      current_user_tipped_post_ids = if current_user
+        tips.select { |t| t.payer_user_id == current_user.id }.map(&:post_id).to_set
+      else
+        Set.new
+      end
+
       # 按 post_id 分组
       grouped = tips.group_by(&:post_id)
 
@@ -139,6 +146,7 @@ module ::DiscourseCredit
         result[pid.to_s] = {
           total_amount: total,
           count: post_tips.size,
+          current_user_tipped: current_user_tipped_post_ids.include?(pid),
           tips: post_tips.map { |t|
             u = users[t.payer_user_id]
             {
