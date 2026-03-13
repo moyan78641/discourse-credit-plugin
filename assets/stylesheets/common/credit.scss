@@ -446,32 +446,48 @@ input[type="password"]#re-pay-key {
   padding: 28px;
   margin-bottom: 24px;
   box-shadow: var(--credit-shadow-md);
-  position: relative;
-  overflow: hidden;
 
-  // 顶部装饰条
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--credit-accent), var(--credit-green));
-  }
-
+  // ── 头部：头像 + 用户信息 + 余额 ──
   .wallet-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    padding-top: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .wallet-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .wallet-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--credit-card-border);
+    box-shadow: var(--credit-shadow-sm);
+    flex-shrink: 0;
+  }
+
+  .wallet-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .wallet-username {
-    font-size: 1.1em;
+    font-size: 1.15em;
     font-weight: 700;
     color: var(--primary);
+    line-height: 1.2;
+  }
+
+  .wallet-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .wallet-level {
@@ -479,11 +495,10 @@ input[type="password"]#re-pay-key {
     align-items: center;
     background: var(--credit-accent-light);
     color: var(--credit-accent);
-    padding: 3px 10px;
+    padding: 2px 8px;
     border-radius: 20px;
-    font-size: 0.75em;
+    font-size: 0.72em;
     font-weight: 600;
-    margin-left: 8px;
   }
 
   .wallet-admin-badge {
@@ -491,18 +506,18 @@ input[type="password"]#re-pay-key {
     align-items: center;
     background: var(--credit-red-light);
     color: var(--credit-red);
-    padding: 3px 10px;
+    padding: 2px 8px;
     border-radius: 20px;
     font-size: 0.72em;
     font-weight: 600;
-    margin-left: 6px;
   }
 
   .balance-label {
-    font-size: 0.82em;
+    font-size: 0.78em;
     color: var(--primary-medium);
     display: block;
     margin-bottom: 2px;
+    text-align: right;
   }
 
   .balance-value {
@@ -511,20 +526,51 @@ input[type="password"]#re-pay-key {
     color: var(--primary);
     display: block;
     letter-spacing: -0.02em;
+    text-align: right;
+    line-height: 1;
   }
 
+  // ── 统计区：独立小卡片 ──
   .wallet-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin-bottom: 20px;
-    padding: 16px 0;
-    border-top: 1px solid var(--credit-card-border);
-    border-bottom: 1px solid var(--credit-card-border);
 
     .stat-item {
+      background: var(--credit-card-bg);
+      border: 1px solid var(--credit-card-border);
+      border-radius: var(--credit-radius-sm);
+      padding: 14px;
       text-align: center;
-      padding: 8px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+      &:hover {
+        box-shadow: var(--credit-shadow-sm);
+        transform: translateY(-1px);
+      }
+    }
+
+    .stat-icon {
+      display: block;
+      margin-bottom: 6px;
+
+      .d-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .stat-income .stat-icon .d-icon {
+      color: var(--credit-green);
+    }
+
+    .stat-expense .stat-icon .d-icon {
+      color: var(--credit-red);
+    }
+
+    .stat-score .stat-icon .d-icon {
+      color: var(--credit-accent);
     }
 
     .stat-label {
@@ -538,12 +584,13 @@ input[type="password"]#re-pay-key {
     }
 
     .stat-value {
-      font-size: 1.15em;
+      font-size: 1.2em;
       font-weight: 700;
       color: var(--primary);
     }
   }
 
+  // ── 操作按钮 ──
   .wallet-actions {
     display: flex;
     flex-wrap: wrap;

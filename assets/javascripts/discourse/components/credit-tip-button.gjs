@@ -19,7 +19,7 @@ export default class CreditTipButton extends Component {
       class="post-action-menu__credit-tip credit-tip-btn"
       ...attributes
       @action={{this.tipUser}}
-      @icon="hand-holding-heart"
+      @icon="coins"
       @translatedTitle="打赏积分"
     />
   </template>

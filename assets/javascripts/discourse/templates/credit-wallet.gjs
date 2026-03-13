@@ -7,8 +7,10 @@ import { fn } from "@ember/helper";
 import { eq } from "truth-helpers";
 import { ajax } from "discourse/lib/ajax";
 import icon from "discourse/helpers/d-icon";
+import { service } from "@ember/service";
 
 class CreditWalletPage extends Component {
+  @service currentUser;
   @tracked wallet = null;
   @tracked orders = [];
   @tracked loading = true;
@@ -109,6 +111,13 @@ class CreditWalletPage extends Component {
     return (t) => map[t] || t;
   }
 
+  get avatarUrl() {
+    if (this.currentUser?.avatar_template) {
+      return this.currentUser.avatar_template.replace("{size}", "120");
+    }
+    return null;
+  }
+
   <template>
     <div class="credit-wallet-page">
       <h2>{{icon "wallet"}} 积分钱包</h2>
@@ -135,9 +144,16 @@ class CreditWalletPage extends Component {
           <div class="credit-wallet-card">
             <div class="wallet-header">
               <div class="wallet-user">
-                <span class="wallet-username">{{this.wallet.username}}</span>
-                <span class="wallet-level">{{this.wallet.pay_level_name}}</span>
-                {{#if this.wallet.is_admin}}<span class="wallet-admin-badge">管理员</span>{{/if}}
+                {{#if this.avatarUrl}}
+                  <img class="wallet-avatar" src={{this.avatarUrl}} alt={{this.wallet.username}} />
+                {{/if}}
+                <div class="wallet-user-info">
+                  <span class="wallet-username">{{this.wallet.username}}</span>
+                  <div class="wallet-badges">
+                    <span class="wallet-level">{{this.wallet.pay_level_name}}</span>
+                    {{#if this.wallet.is_admin}}<span class="wallet-admin-badge">管理员</span>{{/if}}
+                  </div>
+                </div>
               </div>
               <div class="wallet-balance-main">
                 <span class="balance-label">可用余额</span>
@@ -145,9 +161,21 @@ class CreditWalletPage extends Component {
               </div>
             </div>
             <div class="wallet-stats">
-              <div class="stat-item"><span class="stat-label">总收入</span><span class="stat-value">{{this.wallet.total_receive}}</span></div>
-              <div class="stat-item"><span class="stat-label">总支出</span><span class="stat-value">{{this.wallet.total_payment}}</span></div>
-              <div class="stat-item"><span class="stat-label">基准分数</span><span class="stat-value">{{this.wallet.initial_leaderboard_score}}</span></div>
+              <div class="stat-item stat-income">
+                <span class="stat-icon">{{icon "arrow-trend-up"}}</span>
+                <span class="stat-label">总收入</span>
+                <span class="stat-value">{{this.wallet.total_receive}}</span>
+              </div>
+              <div class="stat-item stat-expense">
+                <span class="stat-icon">{{icon "arrow-trend-down"}}</span>
+                <span class="stat-label">总支出</span>
+                <span class="stat-value">{{this.wallet.total_payment}}</span>
+              </div>
+              <div class="stat-item stat-score">
+                <span class="stat-icon">{{icon "chart-simple"}}</span>
+                <span class="stat-label">基准分数</span>
+                <span class="stat-value">{{this.wallet.initial_leaderboard_score}}</span>
+              </div>
             </div>
             <div class="wallet-actions">
               <a href="/credit/merchant" class="btn btn-default">{{icon "store"}} 商户</a>

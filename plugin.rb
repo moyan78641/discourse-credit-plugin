@@ -20,7 +20,7 @@ after_initialize do
   # SVG icons
   %w[
     wallet gift store cart-shopping arrow-left plus key gears
-    bolt-lightning envelope heart hand-holding-heart right-left
+    bolt-lightning envelope heart coins right-left
     chart-line magnifying-glass check xmark pen-to-square lock
     circle-plus receipt file-lines
   ].each { |i| register_svg_icon i }

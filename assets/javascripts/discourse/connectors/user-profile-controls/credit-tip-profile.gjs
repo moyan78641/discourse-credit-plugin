@@ -24,7 +24,7 @@ export default class CreditTipProfile extends Component {
       <DButton
         class="btn btn-primary credit-profile-tip-btn"
         @action={{this.tipUser}}
-        @icon="hand-holding-heart"
+        @icon="coins"
         @translatedLabel="打赏"
       />
     {{/if}}
