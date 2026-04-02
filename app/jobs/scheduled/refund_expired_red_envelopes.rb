@@ -25,6 +25,7 @@ module Jobs
             payer_user_id: 0,
             payee_user_id: envelope.sender_id,
             amount: refund_amount,
+            actual_amount: refund_amount,
             status: "success",
             order_type: "red_envelope_refund",
             remark: "红包 ##{envelope.id} 过期退款",
