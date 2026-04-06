@@ -240,7 +240,7 @@ class CreditWalletPage extends Component {
                 </div>
                 <div class="receipt-amount">
                   <span class="receipt-amount-label">交易金额</span>
-                  <span class="receipt-amount-value">{{this.orderDetail.amount}}</span>
+                  <span class="receipt-amount-value">{{this.orderDetail.display_amount}}</span>
                 </div>
                 <div class="receipt-rows">
                   <div class="receipt-row"><span class="receipt-label">订单号</span><span class="receipt-value mono">{{this.orderDetail.order_no}}</span></div>

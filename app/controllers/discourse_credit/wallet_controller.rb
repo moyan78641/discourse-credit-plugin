@@ -74,12 +74,8 @@ module ::DiscourseCredit
         payee = user_map[o.payee_user_id]
         is_income = o.payee_user_id == current_user.id && o.payer_user_id != current_user.id
 
-        # 显示金额：收入方看 actual_amount，支出方看 amount + fee
-        display_amount = if is_income
-          o.actual_amount.to_f
-        else
-          (o.amount + (o.fee_amount || 0)).to_f
-        end
+        # 显示金额按实际资金影响计算：赠与类由付款方承担手续费，交易类由收款方承担手续费
+        display_amount = o.effective_display_amount_for(current_user.id)
 
         {
           id: o.id,
@@ -89,7 +85,8 @@ module ::DiscourseCredit
           display_amount: display_amount,
           fee_rate: o.fee_rate.to_f,
           fee_amount: o.fee_amount.to_f,
-          actual_amount: o.actual_amount.to_f,
+          actual_amount: o.effective_actual_amount,
+          fee_bearer: o.fee_bearer,
           status: o.status,
           type: o.order_type,
           is_income: is_income,
